@@ -602,7 +602,7 @@ export default function LoginScreen() {
                 <p className="ls-patient-lbl">New to QELCare?</p>
                 <div className="ls-patient-btns">
                   <button className="ls-patient-btn" onClick={() => navigate("/register")}>
-                    <UserPlusIcon />Sign Up
+                    <UserPlusIcon />New Patient
                   </button>
                 </div>
               </div>
