@@ -2,7 +2,13 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { authFetch, logout } from "../../utils/auth";
 import MainLayout from "../Layout/MainLayout";
 import { EmptyState, LoadingState } from "../Workflow/ClinicUi";
-import { ageFromBirthDate } from "../../utils/manilaDate";
+import { ageFromBirthDate, CLINIC_TZ } from "../../utils/manilaDate";
+
+// Same two sub-sections as the website's Profile Settings.
+const TABS = [
+  { id: "profile", label: "Profile" },
+  { id: "security", label: "Security" },
+];
 
 const blankForm = {
   username: "",
@@ -143,11 +149,50 @@ const SECTION_ICONS = {
   ),
 };
 
+const TAB_ICONS = {
+  profile: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  ),
+  security: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  ),
+};
+
 function SectionHead({ icon, title }) {
   return (
     <div className="ps-section-head">
       <span className="ps-sdot">{SECTION_ICONS[icon]}</span>
       <h4>{title}</h4>
+    </div>
+  );
+}
+
+// Clinic time (Asia/Manila), whatever the phone's time zone. Same as the website.
+function formatDateTime(value) {
+  if (!value) return "Not recorded";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Not recorded";
+  return new Intl.DateTimeFormat("en-PH", {
+    timeZone: CLINIC_TZ,
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+// One read-only account detail on the Security tab.
+function ReadOnly({ label, value, mono = false }) {
+  return (
+    <div className="ps-stat">
+      <div className="ps-stat-k">{label}</div>
+      <div className={`ps-stat-v${mono ? " mono" : ""}`}>{value || "Not recorded"}</div>
     </div>
   );
 }
@@ -171,6 +216,7 @@ function passwordChecks(password) {
 }
 
 export default function ProfileScreen() {
+  const [activeTab, setActiveTab] = useState("profile");
   const [profile, setProfile] = useState(null);
   const [patient, setPatient] = useState(null);
   const [form, setForm] = useState(blankForm);
@@ -234,6 +280,16 @@ export default function ProfileScreen() {
   const statusValue = profile?.status || "unknown";
   const statusOk = String(statusValue).toLowerCase() === "verified";
   const hasPhoto = Boolean(profile?.profile_picture);
+
+  // Typed values stay when switching tabs (as on the website); only the
+  // messages are cleared, so one tab's notice isn't left showing over the other.
+  function switchTab(id) {
+    if (id === activeTab) return;
+    setActiveTab(id);
+    setError("");
+    setMessage("");
+    setPwError("");
+  }
 
   function updateField(name, value) {
     setForm((current) => ({ ...current, [name]: value }));
@@ -358,8 +414,9 @@ export default function ProfileScreen() {
       setOtpSent(false);
       setOtpVerified(false);
       setOtpCode("");
-      setMessage("Profile updated. Your account and linked patient profile are synced.");
+      // After the reload (it clears messages), so the confirmation stays on screen.
       await load();
+      setMessage("Profile updated. Your account and linked patient profile are synced.");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -397,8 +454,8 @@ export default function ProfileScreen() {
           localStorage.setItem("user", JSON.stringify({ ...JSON.parse(storedUser), profile_picture: url }));
         } catch { /* ignore */ }
       }
-      setMessage("Profile photo updated.");
       await load();
+      setMessage("Profile photo updated.");
     } catch (err) {
       setError(err.message || "Upload failed.");
     } finally {
@@ -439,7 +496,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <MainLayout pageTitle="Profile Settings" pageSubtitle="Edit account and contact details with OTP verification">
+    <MainLayout pageTitle="Profile Settings" pageSubtitle="Manage your patient account details">
       <div className="ps-page">
         {error && (
           <div className="ps-toast error">
@@ -484,9 +541,25 @@ export default function ProfileScreen() {
                     </div>
                   </div>
                 </div>
+                <div className="ps-tabs" role="tablist" aria-label="Profile Settings sections">
+                  {TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={activeTab === tab.id}
+                      className={activeTab === tab.id ? "active" : ""}
+                      onClick={() => switchTab(tab.id)}
+                    >
+                      {TAB_ICONS[tab.id]}
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </section>
 
+            {activeTab === "profile" && (
             <section className="ps-card ps-panel">
               <div className="ps-panel-head">
                 <div className="ps-htitle">
@@ -602,13 +675,44 @@ export default function ProfileScreen() {
 
                 <div className="ps-form-actions">
                   <button type="submit" className="ps-btn primary" disabled={!canSave}>
-                    {saving ? "Saving..." : "Save Profile"}
+                    {saving ? "Saving..." : "Save Changes"}
                   </button>
                   <button type="button" className="ps-btn ghost" onClick={load} disabled={saving}>
                     Reset
                   </button>
                 </div>
               </form>
+            </section>
+            )}
+
+            {activeTab === "security" && (
+            <>
+            <section className="ps-card ps-panel">
+              <div className="ps-panel-head">
+                <div className="ps-htitle">
+                  <span className="ps-hicon">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  </span>
+                  <div>
+                    <h3>Account Status</h3>
+                    <p>Live account security fields from the backend.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="ps-status-grid">
+                <ReadOnly label="Username" value={profile.username} />
+                <ReadOnly label="Role" value={profile.role} />
+                <ReadOnly label="Status" value={profile.status} />
+                <ReadOnly label="User ID" value={profile.user_id ? `#${profile.user_id}` : ""} mono />
+                <ReadOnly label="Last Login" value={formatDateTime(profile.last_login)} mono />
+                <ReadOnly label="Password Changed" value={formatDateTime(profile.password_changed_at)} mono />
+                <ReadOnly label="Email Changed" value={formatDateTime(profile.email_changed_at)} mono />
+                <ReadOnly label="Failed Login Attempts" value={String(profile.failed_login_attempts || 0)} mono />
+                <ReadOnly label="Lockout Until" value={formatDateTime(profile.lockout_until)} mono />
+                <ReadOnly label="Created" value={formatDateTime(profile.created_at)} mono />
+              </div>
             </section>
 
             <section className="ps-card ps-panel">
@@ -663,6 +767,8 @@ export default function ProfileScreen() {
                 </div>
               </div>
             </section>
+            </>
+            )}
           </>
         )}
       </div>
@@ -761,6 +867,47 @@ export default function ProfileScreen() {
 .ps-chips .status.warn { background: #fdf0e6; color: #a2621f; }
 .ps-chips .status.warn::before { background: #d9832b; }
 .ps-chips .extra { background: #eef3f8; color: #3d5168; }
+
+/* Profile / Security switch: the website's segmented control, full width here. */
+.ps-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  margin-top: 16px;
+  border-radius: 13px;
+  background: #eef2f8;
+  border: 1px solid #e3eaf4;
+}
+.ps-tabs button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 0 12px;
+  cursor: pointer;
+}
+.ps-tabs button.active { background: #fff; color: var(--nv-deep); box-shadow: 0 2px 8px -3px rgba(15, 39, 68, 0.25); }
+
+.ps-status-grid { padding: 16px 18px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.ps-stat {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #fbfdff, #f6f9fd);
+  border-radius: 13px;
+  padding: 12px 13px;
+  min-width: 0;
+}
+.ps-stat-k { font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: #8493a6; margin-bottom: 6px; }
+.ps-stat-v { font-size: 13.5px; font-weight: 700; color: var(--nv-deep); overflow-wrap: anywhere; }
+.ps-stat-v.mono { font-variant-numeric: tabular-nums; }
 
 .ps-panel { overflow: hidden; }
 .ps-panel-head {
