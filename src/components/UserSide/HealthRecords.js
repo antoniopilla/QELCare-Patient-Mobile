@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.entry";
+import pdfWorker from "pdfjs-dist/build/pdf.worker.min.js?url";
 import { authFetch, getToken, API_URL } from "../../utils/auth";
 import {
   ActionButton,
@@ -10,10 +10,12 @@ import {
   LoadingState,
   Panel,
   formatDate,
-  inputStyle,
 } from "../Workflow/ClinicUi";
 import Pagination, { usePagination } from "../common/Pagination";
+import ConfirmModal from "../common/ConfirmModal";
 import { manilaNowMinute, manilaToday } from "../../utils/manilaDate";
+import styles from "./HealthRecords.module.css";
+import { StatusMark } from "../ui";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
@@ -119,8 +121,8 @@ async function toBase64(source) {
     const mimeType = source.type || "image/jpeg";
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(",")[1]);
-      reader.onerror = () => reject(new Error(`Couldn't open "${source.name || "the file"}". Choose it again, or use a different file.`));
+      reader.onload = () => resolve((/** @type {string} */ (reader.result)).split(",")[1]);
+      reader.onerror = () => reject(new Error(`Couldn't open "${(/** @type {File} */ (source)).name || "the file"}". Choose it again, or use a different file.`));
       reader.readAsDataURL(source);
     });
     return { base64, mimeType };
@@ -240,6 +242,7 @@ function DocumentsTab() {
   const [ocrBusy, setOcrBusy] = useState(false);
   const [status, setStatus] = useState(null);
   const [error, setError] = useState(null);
+  const [confirm, setConfirm] = useState(null);
   const fileInputRef = useRef(null);
   const formRef = useRef(null);
   const flashTimer = useRef(null);
@@ -384,8 +387,11 @@ function DocumentsTab() {
     }
   };
 
-  const remove = async (item) => {
-    if (!window.confirm(`Delete "${item.title}"?`)) return;
+  const remove = (item) => {
+    setConfirm({ title: "Delete Document", message: `Delete "${item.title}"?`, confirmText: "Delete", item });
+  };
+
+  const doRemove = async (item) => {
     setError(null); setStatus(null);
     try {
       const response = await authFetch(`/patient-results/${item.result_id}`, { method: "DELETE" });
@@ -400,12 +406,12 @@ function DocumentsTab() {
   };
 
   return (
-    <div style={{ display: "grid", gap: 14 }}>
-      <Panel style={{ padding: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+    <div className={styles.stack}>
+      <Panel className={styles.panelBody}>
+        <div className={styles.headingRow}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 900, color: "#162235" }}>Medical Documents</div>
-            <div style={{ color: "#6b778c", fontSize: 13, marginTop: 3 }}>
+            <div className={styles.sectionTitle}>Medical Documents</div>
+            <div className={styles.help}>
               Upload personal copies of lab results, X-rays, prescriptions, and other medical papers. AI Vision reads the text and detects the document type. This is your personal tracker, not an official clinic submission.
             </div>
           </div>
@@ -413,53 +419,30 @@ function DocumentsTab() {
         </div>
       </Panel>
 
-      {status && <div style={{ padding: "10px 12px", borderRadius: 8, background: "#edf8f1", color: "#0f6b3c", fontSize: 13, fontWeight: 800 }}>{status}</div>}
+      {status && <div className={styles.notice}>{status}</div>}
       <ErrorState message={error} />
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(280px, 380px) 1fr", gap: 16, alignItems: "start" }}>
-        <Panel style={{ padding: 14 }}>
+      <div className={styles.documentsGrid}>
+        <Panel className={styles.listPanel}>
           <Field label="Search documents">
-            <input style={inputStyle} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search title, type, facility, text" />
+            <input className={styles.control} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search title, type, facility, text" />
           </Field>
-          <div style={{ height: 12 }} />
+          <div className={styles.spacer} />
           {loading ? (
             <LoadingState label="Loading documents..." />
           ) : results.length === 0 ? (
-            <EmptyState title="No documents yet" detail="Upload a medical paper or enter details manually." />
+            <EmptyState title="No documents yet" detail="Upload a medical paper or enter details manually." action={<ActionButton onClick={addDocument}>Add Document</ActionButton>} />
           ) : filtered.length === 0 ? (
-            <EmptyState title="No documents match your search" detail="Try a different title, type, facility, or a word from the text." />
+            <EmptyState title="No documents match your search" detail="Try a different title, type, facility, or a word from the text." action={<ActionButton tone="secondary" onClick={() => setSearch("")}>Clear search</ActionButton>} />
           ) : (
-            <div style={{ display: "grid", gap: 10 }}>
+            <div className={`${styles.ruledList} reveal`}>
               {pageItems.map((item) => {
                 const isSelected = selected?.result_id === item.result_id;
                 return (
                   // Open and Delete are two separate buttons side by side (a
                   // button inside a button is not valid and misbehaves for
                   // keyboard and screen-reader users).
-                  <div
-                    key={item.result_id}
-                    style={{
-                      display: "flex", alignItems: "flex-start", gap: 12,
-                      border: `1px solid ${isSelected ? "#163a6b" : "#e3ebf5"}`,
-                      background: isSelected ? "#f3f7ff" : "#fff",
-                      borderRadius: 8,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => selectItem(item)}
-                      aria-pressed={isSelected}
-                      style={{
-                        flex: 1, minWidth: 0, textAlign: "left", border: "none", background: "transparent",
-                        borderRadius: 8, padding: 14, cursor: "pointer", fontFamily: "inherit",
-                      }}
-                    >
-                      <div style={{ fontSize: 15, fontWeight: 900, color: "#162235", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</div>
-                      <div style={{ color: "#6b778c", fontSize: 12, marginTop: 4 }}>{item.result_type || "Medical Document"} - {formatDate(item.result_date || item.created_at)}</div>
-                      {item.source_facility && <div style={{ color: "#42526a", fontSize: 12, marginTop: 4 }}>{item.source_facility}</div>}
-                    </button>
-                    <ActionButton tone="danger" aria-label={`Delete ${item.title}`} onClick={() => remove(item)} style={{ margin: "14px 14px 14px 0", flexShrink: 0 }}>Delete</ActionButton>
-                  </div>
+                  <HealthDocumentRow key={item.result_id} item={item} isSelected={isSelected} onSelect={selectItem} onDelete={remove} />
                 );
               })}
             </div>
@@ -480,60 +463,21 @@ function DocumentsTab() {
           tabIndex={-1}
           role="group"
           aria-label={selected ? "Edit document" : "Add document"}
-          style={{
-            // scrollMarginTop: stop below the sticky top bar (and the phone's
-            // status bar area) when scrolled to.
-            outline: "none", borderRadius: 8, scrollMarginTop: "calc(84px + env(safe-area-inset-top, 0px))",
-            boxShadow: formFlash ? "0 0 0 3px rgba(22,58,107,.3)" : "0 0 0 0 rgba(22,58,107,0)",
-            transition: "box-shadow .35s ease",
-          }}
+          className={[styles.documentForm, formFlash && styles.formFlash].filter(Boolean).join(" ")}
         >
-        <Panel style={{ padding: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 14 }}>
-            <div style={{ fontSize: 16, fontWeight: 900, color: "#162235" }}>{selected ? "Edit Document" : "Add Document"}</div>
-            {ocrBusy && <div style={{ color: "#163a6b", fontWeight: 900, fontSize: 13 }}>Reading...</div>}
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-            {!selected && (
-              <Field label="Upload file(s)">
-                <input ref={fileInputRef} type="file" multiple accept={ACCEPTED_FILES} onChange={chooseFiles} style={inputStyle} />
-                {files.length > 0 && (
-                  <div style={{ fontSize: 11, color: "#6b778c", marginTop: 4 }}>
-                    {files.length === 1 ? "1 file selected." : `${files.length} files selected. All are read together; the first one is saved as the attachment.`}
-                  </div>
-                )}
-              </Field>
-            )}
-            {!selected && (
-              <Field label="AI Vision">
-                <ActionButton disabled={!files.length || ocrBusy} onClick={runOcr}>{ocrBusy ? "Reading..." : "Extract Text"}</ActionButton>
-              </Field>
-            )}
-            <Field label="Title"><input name="title" value={form.title} onChange={setField} maxLength={200} style={inputStyle} placeholder="e.g. CBC Result - May 2026" /></Field>
-            <Field label="Document type"><input name="result_type" value={form.result_type} onChange={setField} maxLength={100} style={inputStyle} placeholder="Auto-detected by AI (editable)" /></Field>
-            <Field label="Source facility"><input name="source_facility" value={form.source_facility} onChange={setField} maxLength={200} style={inputStyle} placeholder="Clinic, hospital, or lab" /></Field>
-            <Field label="Document date"><input name="result_date" type="date" value={form.result_date} onChange={setField} style={inputStyle} /></Field>
-          </div>
-
-          <div style={{ display: "grid", gap: 12, marginTop: 12 }}>
-            <Field label="Extracted text"><textarea name="extracted_text" value={form.extracted_text} onChange={setField} rows={10} style={{ ...inputStyle, resize: "vertical", lineHeight: 1.5 }} placeholder="AI Vision text or manually typed details" /></Field>
-            <Field label="My notes"><textarea name="summary_notes" value={form.summary_notes} onChange={setField} rows={3} style={{ ...inputStyle, resize: "vertical", lineHeight: 1.5 }} placeholder="Personal notes or reminders" /></Field>
-          </div>
-
-          {selected?.file_url && (
-            <div style={{ marginTop: 12, padding: 12, border: "1px solid #e3ebf5", borderRadius: 8, background: "#f8fbff" }}>
-              <a href={selected.file_url} target="_blank" rel="noreferrer" style={{ color: "#163a6b", fontWeight: 900 }}>Open uploaded file</a>
-            </div>
-          )}
-
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
-            <ActionButton tone="secondary" onClick={startNew}>{selected ? "Cancel" : "Clear"}</ActionButton>
-            <ActionButton disabled={saving || ocrBusy} onClick={save}>{saving ? "Saving..." : selected ? "Save Changes" : "Save Document"}</ActionButton>
-          </div>
-        </Panel>
+        <DocumentEditor selected={selected} ocrBusy={ocrBusy} fileInputRef={fileInputRef} files={files} chooseFiles={chooseFiles} runOcr={runOcr} form={form} setField={setField} startNew={startNew} save={save} saving={saving} />
         </div>
       </div>
+
+      {confirm && (
+        <ConfirmModal
+          title={confirm.title}
+          message={confirm.message}
+          confirmText={confirm.confirmText}
+          onClose={() => setConfirm(null)}
+          onConfirm={() => { const item = confirm.item; setConfirm(null); doRemove(item); }}
+        />
+      )}
     </div>
   );
 }
@@ -570,6 +514,7 @@ function MedicationsTab() {
   const [scheduleDate, setScheduleDate] = useState(todayISO());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [confirm, setConfirm] = useState(null);
   const [status, setStatus] = useState(null);
 
   const [form, setForm] = useState(emptyMedForm);
@@ -692,8 +637,11 @@ function MedicationsTab() {
     }
   };
 
-  const deleteMed = async (med) => {
-    if (!window.confirm(`Remove ${med.drug_name} from your medications?`)) return;
+  const deleteMed = (med) => {
+    setConfirm({ title: "Remove Medication", message: `Remove ${med.drug_name} from your medications?`, confirmText: "Remove", med });
+  };
+
+  const doDeleteMed = async (med) => {
     setError(null);
     try {
       const response = await authFetch(`/medications/${med.medication_id}`, { method: "DELETE" });
@@ -788,50 +736,50 @@ function MedicationsTab() {
   const pendingCount = meds.filter((m) => m.approval_status === "pending").length;
 
   return (
-    <div style={{ display: "grid", gap: 14 }}>
-      <Panel style={{ padding: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+    <div className={styles.stack}>
+      <Panel className={styles.panelBody}>
+        <div className={styles.headingRow}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 900, color: "#162235" }}>Medication Tracking</div>
-            <div style={{ color: "#6b778c", fontSize: 13, marginTop: 3 }}>
+            <div className={styles.sectionTitle}>Medication Tracking</div>
+            <div className={styles.help}>
               Snap a prescription and let AI parse it, or add medicines manually. Track your daily doses and reminders. This is a personal reminder tool, not medical advice.
             </div>
           </div>
           {adherence && adherence.adherence_rate !== null && (
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 26, fontWeight: 900, color: adherence.adherence_rate >= 80 ? "#0f6b3c" : "#b45309" }}>{adherence.adherence_rate}%</div>
-              <div style={{ color: "#6b778c", fontSize: 11, fontWeight: 800 }}>30-DAY ADHERENCE</div>
+            <div className={styles.alignRight}>
+              <div className={styles.adherence}>{adherence.adherence_rate}%</div>
+              <div className={styles.eyebrow}>30-DAY ADHERENCE</div>
             </div>
           )}
         </div>
       </Panel>
 
-      {status && <div style={{ padding: "10px 12px", borderRadius: 8, background: "#edf8f1", color: "#0f6b3c", fontSize: 13, fontWeight: 800 }}>{status}</div>}
+      {status && <div className={styles.notice}>{status}</div>}
       <ErrorState message={error} />
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(300px, 420px) 1fr", gap: 16, alignItems: "start" }}>
+      <div className={styles.medicationsGrid}>
         {/* Left: add / OCR */}
-        <div style={{ display: "grid", gap: 14 }}>
-          <Panel style={{ padding: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 900, color: "#162235", marginBottom: 10 }}>Scan a Prescription (AI)</div>
+        <div className={styles.stack}>
+          <Panel className={styles.panelBody}>
+            <div className={styles.subheading}>Scan a Prescription (AI)</div>
             <Field label="Prescription image(s) or PDF">
-              <input ref={fileInputRef} type="file" multiple accept={ACCEPTED_FILES} onChange={choosePrescriptionFiles} style={inputStyle} />
-              {files.length > 0 && <div style={{ fontSize: 11, color: "#6b778c", marginTop: 4 }}>{files.length} file(s) selected — front/back or multiple pages will be read together.</div>}
+              <input ref={fileInputRef} type="file" multiple accept={ACCEPTED_FILES} onChange={choosePrescriptionFiles} className={styles.control} />
+              {files.length > 0 && <div className={styles.finePrint}>{files.length} file(s) selected — front/back or multiple pages will be read together.</div>}
             </Field>
-            <div style={{ height: 10 }} />
+            <div className={styles.smallSpacer} />
             <ActionButton disabled={!files.length || ocrBusy} onClick={runPrescriptionOcr}>{ocrBusy ? "Reading prescription..." : "Read with AI"}</ActionButton>
 
             {parsed.length > 0 && (
-              <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-                <div style={{ fontSize: 13, fontWeight: 900, color: "#163a6b" }}>Review parsed medications</div>
+              <div className={styles.parsedList}>
+                <div className={styles.reading}>Review parsed medications</div>
                 {parsed.map((item, index) => (
-                  <div key={index} style={{ border: "1px solid #e3ebf5", borderRadius: 8, padding: 10, display: "grid", gap: 8 }}>
-                    <input value={item.drug_name} onChange={(e) => updateParsedField(index, "drug_name", e.target.value)} style={inputStyle} placeholder="Medicine name" />
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                      <input value={item.dosage} onChange={(e) => updateParsedField(index, "dosage", e.target.value)} style={inputStyle} placeholder="Dosage" />
-                      <input type="number" min={1} max={12} value={item.frequency_per_day} onChange={(e) => updateParsedField(index, "frequency_per_day", parseInt(e.target.value, 10) || 1)} style={inputStyle} placeholder="x/day" />
+                  <div key={index} className={styles.parsedCard}>
+                    <input aria-label={`Medicine ${index + 1} name`} value={item.drug_name} onChange={(e) => updateParsedField(index, "drug_name", e.target.value)} className={styles.control} placeholder="Medicine name" />
+                    <div className={styles.compactGrid}>
+                      <input aria-label={`Medicine ${index + 1} dosage`} value={item.dosage} onChange={(e) => updateParsedField(index, "dosage", e.target.value)} className={styles.control} placeholder="Dosage" />
+                      <input aria-label={`Medicine ${index + 1} doses per day`} type="number" min={1} max={12} value={item.frequency_per_day} onChange={(e) => updateParsedField(index, "frequency_per_day", parseInt(e.target.value, 10) || 1)} className={styles.control} placeholder="x/day" />
                     </div>
-                    <input value={item.instructions} onChange={(e) => updateParsedField(index, "instructions", e.target.value)} style={inputStyle} placeholder="Instructions" />
+                    <input aria-label={`Medicine ${index + 1} instructions`} value={item.instructions} onChange={(e) => updateParsedField(index, "instructions", e.target.value)} className={styles.control} placeholder="Instructions" />
                   </div>
                 ))}
                 <ActionButton disabled={saving} onClick={confirmParsed}>{saving ? "Adding..." : `Add ${parsed.length} medication(s)`}</ActionButton>
@@ -839,85 +787,29 @@ function MedicationsTab() {
             )}
           </Panel>
 
-          <Panel style={{ padding: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 900, color: "#162235", marginBottom: 10 }}>{editingId ? "Edit Medication" : "Add Manually"}</div>
-            <div style={{ display: "grid", gap: 10 }}>
-              <Field label="Medicine name *"><input name="drug_name" value={form.drug_name} onChange={setField} style={inputStyle} placeholder="e.g. Paracetamol" /></Field>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <Field label="Dosage"><input name="dosage" value={form.dosage} onChange={setField} style={inputStyle} placeholder="500 mg" /></Field>
-                <Field label="Form"><input name="form" value={form.form} onChange={setField} style={inputStyle} placeholder="tablet" /></Field>
-              </div>
-              <Field label="How often">
-                <select name="frequency_per_day" value={form.frequency_per_day} onChange={setField} style={inputStyle}>
-                  {FREQ_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-              </Field>
-              <Field label="Reminder times">
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
-                  {form.times_of_day.map((t, i) => (
-                    <input key={i} type="time" value={t} onChange={(e) => setTime(i, e.target.value)} style={inputStyle} />
-                  ))}
-                </div>
-              </Field>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <Field label="Start date"><input name="start_date" type="date" value={form.start_date} onChange={setField} style={inputStyle} /></Field>
-                <Field label="Duration (days)"><input name="duration_days" type="number" min={1} value={form.duration_days} onChange={setField} style={inputStyle} placeholder="e.g. 7" /></Field>
-              </div>
-              <Field label="Instructions"><input name="instructions" value={form.instructions} onChange={setField} style={inputStyle} placeholder="e.g. after meals" /></Field>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#42526a", fontWeight: 700 }}>
-                <input name="reminders_enabled" type="checkbox" checked={form.reminders_enabled} onChange={setField} /> Enable reminders
-              </label>
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-                {editingId && <ActionButton tone="secondary" onClick={resetForm}>Cancel</ActionButton>}
-                <ActionButton disabled={saving} onClick={saveMed}>{saving ? "Saving..." : editingId ? "Save Changes" : "Add Medication"}</ActionButton>
-              </div>
-            </div>
-          </Panel>
+          <MedicationEditor editingId={editingId} form={form} setField={setField} setTime={setTime} resetForm={resetForm} saving={saving} saveMed={saveMed} />
         </div>
 
         {/* Right: today's schedule + medication list */}
-        <div style={{ display: "grid", gap: 14 }}>
-          <Panel style={{ padding: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
-              <div style={{ fontSize: 15, fontWeight: 900, color: "#162235" }}>Dose Schedule</div>
-              <input type="date" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} style={{ ...inputStyle, width: "auto" }} />
+        <div className={styles.stack}>
+          <Panel className={styles.panelBody}>
+            <div className={styles.scheduleHeader}>
+              <div className={styles.subheading}>Dose Schedule</div>
+              <input aria-label="Dose schedule date" type="date" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} className={styles.dateControl} />
             </div>
             {schedule.slots.length === 0 ? (
               <EmptyState title="No doses scheduled" detail="Active medications with reminder times show up here." />
             ) : (
-              <div style={{ display: "grid", gap: 8 }}>
+              <div className={`${styles.doseList} reveal`}>
                 {schedule.slots.map((slot) => (
-                  <div key={`${slot.medication_id}-${slot.scheduled_time}`} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12,
-                    border: "1px solid #e3ebf5", borderRadius: 8, padding: "10px 12px",
-                    background: slot.status === "taken" ? "#edf8f1" : slot.status === "skipped" ? "#fdf0f0" : "#fff",
-                  }}>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 14, fontWeight: 900, color: "#162235" }}>{slot.scheduled_time} - {slot.drug_name}</div>
-                      <div style={{ color: "#6b778c", fontSize: 12 }}>{[slot.dosage, slot.instructions].filter(Boolean).join(" - ") || "No extra instructions"}</div>
-                    </div>
-                    <div style={{ display: "flex", gap: 6 }}>
-                      {slot.status === "taken" ? (
-                        <span style={{ color: "#0f6b3c", fontWeight: 900, fontSize: 13 }}>Taken</span>
-                      ) : slot.status === "skipped" ? (
-                        <span style={{ color: "#b91c1c", fontWeight: 900, fontSize: 13 }}>Skipped</span>
-                      ) : `${schedule.date}T${slot.scheduled_time}` > nowMinute ? (
-                        <span style={{ color: "#6b778c", fontWeight: 800, fontSize: 13 }}>Not due yet</span>
-                      ) : (
-                        <>
-                          <ActionButton onClick={() => logDose(slot, "taken")}>Take</ActionButton>
-                          <ActionButton tone="secondary" onClick={() => logDose(slot, "skipped")}>Skip</ActionButton>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  <DoseRow key={`${slot.medication_id}-${slot.scheduled_time}`} slot={slot} scheduleDate={schedule.date} nowMinute={nowMinute} onLog={logDose} />
                 ))}
               </div>
             )}
           </Panel>
 
-          <Panel style={{ padding: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 900, color: "#162235", marginBottom: 12 }}>
+          <Panel className={styles.panelBody}>
+            <div className={styles.subheading}>
               My Medications ({activeCount} active{pendingCount > 0 ? `, ${pendingCount} pending review` : ""})
             </div>
             {loading ? (
@@ -925,48 +817,9 @@ function MedicationsTab() {
             ) : meds.length === 0 ? (
               <EmptyState title="No medications tracked" detail="Scan a prescription or add a medicine manually." />
             ) : (
-              <div style={{ display: "grid", gap: 10 }}>
+              <div className={`${styles.ruledList} reveal`}>
                 {pageItems.map((med) => (
-                  <div key={med.medication_id} style={{ border: "1px solid #e3ebf5", borderRadius: 8, padding: 12, opacity: med.status === "active" ? 1 : 0.65 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: 15, fontWeight: 900, color: "#162235" }}>
-                          {med.drug_name} {med.dosage && <span style={{ color: "#6b778c", fontWeight: 700 }}>- {med.dosage}</span>}
-                        </div>
-                        <div style={{ color: "#6b778c", fontSize: 12, marginTop: 3 }}>
-                          {(med.frequency_per_day || 1)}x/day at {(Array.isArray(med.times_of_day) ? med.times_of_day : []).join(", ") || "-"}
-                          {med.end_date ? ` - until ${formatDate(med.end_date)}` : " - ongoing"}
-                        </div>
-                        {med.instructions && <div style={{ color: "#42526a", fontSize: 12, marginTop: 3 }}>{med.instructions}</div>}
-                        <div style={{ marginTop: 4, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-                          {med.approval_status === "pending" ? (
-                            <span style={{ fontSize: 11, fontWeight: 900, padding: "2px 8px", borderRadius: 999, color: "#9a6500", background: "#fff7df" }}>PENDING DOCTOR REVIEW</span>
-                          ) : med.approval_status === "rejected" ? (
-                            <span style={{ fontSize: 11, fontWeight: 900, padding: "2px 8px", borderRadius: 999, color: "#b91c1c", background: "#fdecec" }}>NOT VALIDATED</span>
-                          ) : (
-                            <span style={{
-                              fontSize: 11, fontWeight: 900, padding: "2px 8px", borderRadius: 999,
-                              color: med.status === "active" ? "#0f6b3c" : "#64748b",
-                              background: med.status === "active" ? "#e7f6ed" : "#eef2f6",
-                            }}>{String(med.status || "").toUpperCase()}</span>
-                          )}
-                          {med.source === "ocr" && <span style={{ fontSize: 11, color: "#6b778c" }}>via AI scan</span>}
-                        </div>
-                        {med.approval_status === "rejected" && med.rejection_reason && (
-                          <div style={{ color: "#b91c1c", fontSize: 12, marginTop: 4 }}>Reason: {med.rejection_reason}</div>
-                        )}
-                      </div>
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "flex-start" }}>
-                        <ActionButton tone="secondary" onClick={() => editMed(med)}>Edit</ActionButton>
-                        {med.status === "active" ? (
-                          <ActionButton tone="secondary" onClick={() => setMedStatus(med, "finished")}>Finish</ActionButton>
-                        ) : med.status === "finished" || med.status === "paused" ? (
-                          <ActionButton tone="secondary" onClick={() => setMedStatus(med, "active")}>Reactivate</ActionButton>
-                        ) : null}
-                        <ActionButton tone="danger" onClick={() => deleteMed(med)}>Delete</ActionButton>
-                      </div>
-                    </div>
-                  </div>
+                  <MedicationEntry key={med.medication_id} med={med} onEdit={editMed} onStatus={setMedStatus} onDelete={deleteMed} />
                 ))}
               </div>
             )}
@@ -982,6 +835,16 @@ function MedicationsTab() {
           </Panel>
         </div>
       </div>
+
+      {confirm && (
+        <ConfirmModal
+          title={confirm.title}
+          message={confirm.message}
+          confirmText={confirm.confirmText}
+          onClose={() => setConfirm(null)}
+          onConfirm={() => { const med = confirm.med; setConfirm(null); doDeleteMed(med); }}
+        />
+      )}
     </div>
   );
 }
@@ -995,26 +858,20 @@ export default function HealthRecords() {
     <button
       type="button"
       onClick={() => setTab(id)}
-      style={{
-        padding: "10px 18px", border: "none", cursor: "pointer", fontFamily: "inherit",
-        fontSize: 14, fontWeight: 900,
-        color: tab === id ? "#163a6b" : "#6b778c",
-        background: "transparent",
-        borderBottom: `3px solid ${tab === id ? "#163a6b" : "transparent"}`,
-      }}
+      className={[styles.tab, tab === id && styles.activeTab].filter(Boolean).join(" ")}
     >
       {label}
     </button>
   );
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <Panel style={{ padding: 0, overflow: "hidden" }}>
-        <div style={{ padding: "16px 16px 0" }}>
-          <div style={{ fontSize: 18, fontWeight: 900, color: "#162235" }}>Health Records</div>
-          <div style={{ color: "#6b778c", fontSize: 13, marginTop: 3 }}>Track your medications and store your medical documents in one place.</div>
+    <div className={styles.hub}>
+      <Panel className={styles.hubPanel}>
+        <div className={styles.hubHeading}>
+          <div className={styles.hubTitle}>Health Records</div>
+          <div className={styles.help}>Track your medications and store your medical documents in one place.</div>
         </div>
-        <div style={{ display: "flex", gap: 4, padding: "10px 12px 0", borderBottom: "1px solid #e8eef6" }}>
+        <div className={styles.tabs}>
           {tabBtn("medications", "Medications")}
           {tabBtn("documents", "Documents")}
         </div>
@@ -1024,3 +881,134 @@ export default function HealthRecords() {
     </div>
   );
 }
+
+
+export function HealthDocumentRow({ item, isSelected = false, onSelect, onDelete }) { return (// Open and Delete are two separate buttons side by side (a
+// button inside a button is not valid and misbehaves for
+// keyboard and screen-reader users).
+<div key={item.result_id} className={[styles.documentRow, isSelected && styles.selectedDocument].filter(Boolean).join(" ")}>
+                    <button type="button" onClick={() => onSelect(item)} aria-pressed={isSelected} className={styles.documentButton}>
+                      <div className={styles.entryTitle}>{item.title}</div>
+                      <div className={styles.smallNote}>{item.result_type || "Medical Document"} - {formatDate(item.result_date || item.created_at)}</div>
+                      {item.source_facility && <div className={styles.detail}>{item.source_facility}</div>}
+                    </button>
+                    <ActionButton tone="danger" aria-label={`Delete ${item.title}`} onClick={() => onDelete(item)} className={styles.documentDelete}>Delete</ActionButton>
+                  </div>); }
+
+export function DoseRow({ slot, scheduleDate, nowMinute, onLog }) { return (<div key={`${slot.medication_id}-${slot.scheduled_time}`} className={styles.doseRow}>
+                    <div className={styles.shrink}>
+                      <div className={styles.doseTitle}>{slot.scheduled_time} - {slot.drug_name}</div>
+                      <div className={styles.doseDetail}>{[slot.dosage, slot.instructions].filter(Boolean).join(" - ") || "No extra instructions"}</div>
+                    </div>
+                    <div className={styles.doseActions}>
+                      {slot.status === "taken" ? <StatusMark status="TAKEN" label="Taken" /> : slot.status === "skipped" ? <StatusMark status="SKIPPED" label="Skipped" /> : `${scheduleDate}T${slot.scheduled_time}` > nowMinute ? <StatusMark status="NOT_DUE_YET" label="Not due yet" /> : <>
+                          <ActionButton onClick={() => onLog(slot, "taken")}>Take</ActionButton>
+                          <ActionButton tone="secondary" onClick={() => onLog(slot, "skipped")}>Skip</ActionButton>
+                        </>}
+                    </div>
+                  </div>); }
+
+export function MedicationEntry({ med, onEdit, onStatus, onDelete }) { return (<div key={med.medication_id} className={styles.medicationRow}>
+                    <div className={styles.medicationHeading}>
+                      <div className={styles.shrink}>
+                        <div className={styles.medicineTitle}>
+                          {med.drug_name} {med.dosage && <span className={styles.doseUnit}>- {med.dosage}</span>}
+                        </div>
+                        <div className={styles.medicationSchedule}>
+                          {med.frequency_per_day || 1}x/day at {(Array.isArray(med.times_of_day) ? med.times_of_day : []).join(", ") || "-"}
+                          {med.end_date ? ` - until ${formatDate(med.end_date)}` : " - ongoing"}
+                        </div>
+                        {med.instructions && <div className={styles.detail}>{med.instructions}</div>}
+                        <div className={styles.medicationStatus}>
+                          {med.approval_status === "pending" ? <StatusMark status="PENDING_DOCTOR_REVIEW" label="PENDING DOCTOR REVIEW" /> : med.approval_status === "rejected" ? <StatusMark status="NOT_VALIDATED" label="NOT VALIDATED" /> : <StatusMark status={med.status} label={String(med.status || "").toUpperCase()} />}
+                          {med.source === "ocr" && <span className={styles.source}>via AI scan</span>}
+                        </div>
+                        {med.approval_status === "rejected" && med.rejection_reason && <div className={styles.rejectionReason}>Reason: {med.rejection_reason}</div>}
+                      </div>
+                      <div className={styles.medicationActions}>
+                        <ActionButton tone="secondary" onClick={() => onEdit(med)}>Edit</ActionButton>
+                        {med.status === "active" ? <ActionButton tone="secondary" onClick={() => onStatus(med, "finished")}>Finish</ActionButton> : med.status === "finished" || med.status === "paused" ? <ActionButton tone="secondary" onClick={() => onStatus(med, "active")}>Reactivate</ActionButton> : null}
+                        <ActionButton tone="danger" onClick={() => onDelete(med)}>Delete</ActionButton>
+                      </div>
+                    </div>
+                  </div>); }
+
+export function DocumentEditor({ selected, ocrBusy, fileInputRef, files, chooseFiles, runOcr, form, setField, startNew, save, saving }) { return (<Panel className={styles.panelBody}>
+          <div className={styles.formHeader}>
+            <div className={styles.sectionTitle}>{selected ? "Edit Document" : "Add Document"}</div>
+            {ocrBusy && <div className={styles.reading}>Reading...</div>}
+          </div>
+
+          <div className={styles.formGrid}>
+            {!selected && (
+              <Field label="Upload file(s)">
+                <input ref={fileInputRef} type="file" multiple accept={ACCEPTED_FILES} onChange={chooseFiles} className={styles.control} />
+                {files.length > 0 && (
+                  <div className={styles.finePrint}>
+                    {files.length === 1 ? "1 file selected." : `${files.length} files selected. All are read together; the first one is saved as the attachment.`}
+                  </div>
+                )}
+              </Field>
+            )}
+            {!selected && (
+              <Field label="AI Vision">
+                <ActionButton disabled={!files.length || ocrBusy} onClick={runOcr}>{ocrBusy ? "Reading..." : "Extract Text"}</ActionButton>
+              </Field>
+            )}
+            <Field label="Title"><input name="title" value={form.title} onChange={setField} maxLength={200} className={styles.control} placeholder="e.g. CBC Result - May 2026" /></Field>
+            <Field label="Document type"><input name="result_type" value={form.result_type} onChange={setField} maxLength={100} className={styles.control} placeholder="Auto-detected by AI (editable)" /></Field>
+            <Field label="Source facility"><input name="source_facility" value={form.source_facility} onChange={setField} maxLength={200} className={styles.control} placeholder="Clinic, hospital, or lab" /></Field>
+            <Field label="Document date"><input name="result_date" type="date" value={form.result_date} onChange={setField} className={styles.control} /></Field>
+          </div>
+
+          <div className={styles.fieldStack}>
+            <Field label="Extracted text"><textarea name="extracted_text" value={form.extracted_text} onChange={setField} rows={10} className={styles.textarea} placeholder="AI Vision text or manually typed details" /></Field>
+            <Field label="My notes"><textarea name="summary_notes" value={form.summary_notes} onChange={setField} rows={3} className={styles.textarea} placeholder="Personal notes or reminders" /></Field>
+          </div>
+
+          {selected?.file_url && (
+            <div className={styles.attachment}>
+              <a href={selected.file_url} target="_blank" rel="noreferrer" className={styles.attachmentLink}>Open uploaded file</a>
+            </div>
+          )}
+
+          <div className={styles.actions}>
+            <ActionButton tone="secondary" onClick={startNew}>{selected ? "Cancel" : "Clear"}</ActionButton>
+            <ActionButton disabled={saving || ocrBusy} onClick={save}>{saving ? "Saving..." : selected ? "Save Changes" : "Save Document"}</ActionButton>
+          </div>
+        </Panel>); }
+
+export function MedicationEditor({ editingId, form, setField, setTime, resetForm, saving, saveMed }) { return (<Panel className={styles.panelBody}>
+            <div className={styles.subheading}>{editingId ? "Edit Medication" : "Add Manually"}</div>
+            <div className={styles.ruledList}>
+              <Field label="Medicine name *"><input name="drug_name" value={form.drug_name} onChange={setField} className={styles.control} placeholder="e.g. Paracetamol" /></Field>
+              <div className={styles.compactGrid}>
+                <Field label="Dosage"><input name="dosage" value={form.dosage} onChange={setField} className={styles.control} placeholder="500 mg" /></Field>
+                <Field label="Form"><input name="form" value={form.form} onChange={setField} className={styles.control} placeholder="tablet" /></Field>
+              </div>
+              <Field label="How often">
+                <select name="frequency_per_day" value={form.frequency_per_day} onChange={setField} className={styles.control}>
+                  {FREQ_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </Field>
+              <Field label="Reminder times">
+                <div className={styles.timeGrid}>
+                  {form.times_of_day.map((t, i) => (
+                    <input key={i} aria-label={`Reminder time ${i + 1}`} type="time" value={t} onChange={(e) => setTime(i, e.target.value)} className={styles.control} />
+                  ))}
+                </div>
+              </Field>
+              <div className={styles.compactGrid}>
+                <Field label="Start date"><input name="start_date" type="date" value={form.start_date} onChange={setField} className={styles.control} /></Field>
+                <Field label="Duration (days)"><input name="duration_days" type="number" min={1} value={form.duration_days} onChange={setField} className={styles.control} placeholder="e.g. 7" /></Field>
+              </div>
+              <Field label="Instructions"><input name="instructions" value={form.instructions} onChange={setField} className={styles.control} placeholder="e.g. after meals" /></Field>
+              <label className={styles.checkboxLabel}>
+                <input name="reminders_enabled" type="checkbox" checked={form.reminders_enabled} onChange={setField} /> Enable reminders
+              </label>
+              <div className={styles.plainActions}>
+                {editingId && <ActionButton tone="secondary" onClick={resetForm}>Cancel</ActionButton>}
+                <ActionButton disabled={saving} onClick={saveMed}>{saving ? "Saving..." : editingId ? "Save Changes" : "Add Medication"}</ActionButton>
+              </div>
+            </div>
+          </Panel>); }

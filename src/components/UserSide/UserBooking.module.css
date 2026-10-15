@@ -1,0 +1,44 @@
+.bookingLayout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr); gap: var(--space-24); align-items: start; min-width: 0; }
+.formPanel, .coveragePanel { padding: var(--space-24); }
+.form { display: grid; gap: var(--space-16); min-width: 0; }
+.title { color: var(--ink); font-family: var(--font-display); font-size: 1.75rem; font-weight: 500; line-height: 1.2; }
+.description, .coverageDescription { margin-top: var(--space-8); color: var(--ink-3); font-size: .8125rem; line-height: 1.6; }
+.coverageDescription { margin-bottom: var(--space-16); }
+.patientSelector { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); }
+.patientOption { min-height: calc(var(--space-32) + var(--space-8)); padding: var(--space-8) var(--space-12); border: 1px solid var(--rule); border-radius: var(--radius-control); background: var(--surface); color: var(--ink-2); font-family: var(--font-ui); font-size: .875rem; font-weight: 500; cursor: pointer; }
+.patientOption:hover { background: var(--paper); color: var(--pine); }
+.patientOptionActive, .patientOptionActive:hover { border-color: var(--pine); background: var(--pine-wash); color: var(--pine); font-weight: 600; }
+.relativePanel { padding: var(--space-16); background: var(--paper); }
+.relativeFields { display: grid; gap: var(--space-12); }
+.relativeHeading { display: flex; justify-content: space-between; align-items: center; gap: var(--space-8); flex-wrap: wrap; }
+.sectionTitle { color: var(--ink); font-family: var(--font-display); font-size: 1.375rem; font-weight: 500; line-height: 1.3; }
+.relativePicker { max-width: 240px; }
+.nameGrid, .relationshipGrid, .contactGrid, .scheduleGrid { display: grid; gap: var(--space-12); min-width: 0; }
+.nameGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.relationshipGrid { grid-template-columns: minmax(0, 1fr) 140px 140px; }
+.contactGrid { grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr); }
+.scheduleGrid { grid-template-columns: minmax(0, 1fr) 140px 160px; }
+.saveRelative { display: flex; align-items: center; gap: var(--space-8); color: var(--ink-2); font-size: .8125rem; line-height: 1.5; cursor: pointer; }
+.saveRelative input { accent-color: var(--pine); }
+.fieldHint { margin-top: var(--space-4); color: var(--ink-3); font-size: .75rem; line-height: 1.5; }
+.doctorContext { padding: var(--space-16); border: 1px solid var(--rule); border-radius: var(--radius-control); background: var(--paper); color: var(--ink-2); font-size: .875rem; }
+.doctorName { color: var(--ink); font-weight: 600; }
+.doctorSpecialty { margin-top: var(--space-4); }
+.notes { min-height: calc(var(--space-48) + var(--space-24)); resize: vertical; }
+.formActions { display: flex; flex-wrap: wrap; gap: var(--space-8); padding-top: var(--space-8); }
+.specialties { display: grid; gap: var(--space-12); }
+.specialtyCard { padding: var(--space-16); border: 1px solid var(--rule); border-radius: var(--radius-control); background: var(--paper); }
+.specialtyHeading { display: flex; justify-content: space-between; align-items: center; gap: var(--space-12); flex-wrap: wrap; }
+.specialtyName { color: var(--ink); font-weight: 600; line-height: 1.5; }
+.specialtyCount { margin-top: var(--space-8); color: var(--ink-3); font-size: .8125rem; }
+.numeric { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 1200px) {
+  .bookingLayout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .bookingLayout { gap: var(--space-16); }
+  .formPanel, .coveragePanel, .relativePanel { padding: var(--space-16); }
+  .patientSelector, .nameGrid, .relationshipGrid, .contactGrid, .scheduleGrid { grid-template-columns: minmax(0, 1fr); }
+  .relativePicker { max-width: none; }
+}

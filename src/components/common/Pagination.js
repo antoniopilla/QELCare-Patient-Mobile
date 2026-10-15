@@ -14,13 +14,13 @@ const DEFAULT_PAGE_SIZE = 10;
 
 function buttonStyle(disabled) {
   return {
-    minHeight: 40,
+    minHeight: 44,
     padding: "0 16px",
-    borderRadius: 10,
-    border: "1px solid #e3ebf5",
-    background: "#fff",
-    color: "#163a6b",
-    fontWeight: 800,
+    borderRadius: 6,
+    border: "1px solid var(--rule)",
+    background: "var(--surface)",
+    color: "var(--pine)",
+    fontWeight: 500,
     fontSize: 13,
     fontFamily: "inherit",
     cursor: disabled ? "not-allowed" : "pointer",
@@ -70,7 +70,7 @@ export default function Pagination({
     <div
       style={{
         padding: 14,
-        borderTop: "1px solid #eef3f9",
+        borderTop: "1px solid var(--rule)",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
@@ -78,11 +78,11 @@ export default function Pagination({
         flexWrap: "wrap",
       }}
     >
-      <div style={{ color: "#6b778c", fontSize: 12, fontWeight: 800 }}>
+      <div style={{ color: "var(--ink-2)", fontSize: 12, fontWeight: 500 }}>
         Showing {from} to {to} of {totalItems} {label}
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
-        <span style={{ color: "#8a97a8", fontSize: 12, fontWeight: 800 }}>
+        <span style={{ color: "var(--ink-3)", fontSize: 12, fontWeight: 500 }}>
           Page {page} of {totalPages}
         </span>
         <button

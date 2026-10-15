@@ -1,103 +1,16 @@
-/* ============================================================
-   QELCare Patient Mobile — responsive overrides
-   ------------------------------------------------------------
-   Loaded globally from index.jsx. Auth screens inject their own
-   <style> blocks at render time with desktop 2-column layouts and
-   `html,body{overflow:hidden}`. These rules use !important so they
-   win over those per-screen blocks on small viewports only.
-   Desktop (>= 761px) is left untouched.
-   ============================================================ */
-
-@media (max-width: 760px) {
-
-  /* ---- let auth pages scroll (they lock to 100vh on desktop) ---- */
-  html, body, #root {
-    height: auto !important;
-    min-height: 100% !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-  }
-
-  /* ---- auth page wrappers: clear the status bar, center, don't clip ---- */
-  /* The APK draws edge-to-edge, so the padding respects the safe-area insets to
-     keep the form out from under the phone status bar / notch (falls back to
-     16px when there is no inset, e.g. a desktop browser). align-items:center
-     vertically centers short forms; taller forms (register) simply grow and the
-     page scrolls, so nothing is clipped. 100dvh tracks the visible viewport. */
-  .ls-page, .rg-page, .fp-page, .page-wrap {
-    height: auto !important;
-    min-height: 100vh !important;
-    min-height: 100dvh !important;
-    padding:
-      max(16px, env(safe-area-inset-top))
-      max(16px, env(safe-area-inset-right))
-      max(16px, env(safe-area-inset-bottom))
-      max(16px, env(safe-area-inset-left)) !important;
-    align-items: center !important;
-  }
-
-  /* ---- auth shells: single column, natural height, full width ---- */
-  .ls-shell, .rg-shell, .fp-shell, .shell {
-    grid-template-columns: 1fr !important;
-    width: 100% !important;
-    max-width: 460px !important;
-    height: auto !important;
-    max-height: none !important;
-    min-height: 0 !important;
-    border-radius: 18px !important;
-  }
-
-  /* ---- hide the marketing/brand panel on phones (saves space) ---- */
-  .ls-brand, .rg-brand, .fp-brand, .brand {
-    display: none !important;
-  }
-
-  /* ---- form panels: comfortable padding, full width ---- */
-  .ls-form-panel, .rg-form-panel, .form-pane, .form-wrap {
-    padding: 24px 20px !important;
-    overflow: visible !important;
-  }
-  .ls-form-inner, .rg-form-inner { max-width: 100% !important; }
-
-  /* two-up name fields stack */
-  .rg-field-row { grid-template-columns: 1fr !important; }
-
-  /* keep the 6 OTP boxes on one row but let them shrink to fit */
-  .otp-inputs { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; gap: 6px !important; }
-
-  /* ============================================================
-     App content screens (everything rendered inside MainLayout's
-     <main class="patient-content">). Scoped so chrome is untouched.
-     ============================================================ */
-
-  /* collapse multi-column inline grids into a single column */
-  .patient-content [style*="grid-template-columns"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* ...except compact metric/stat rows, which read better as 2 x 2
-     (this rule comes after the collapse rule so it wins) */
-  .patient-content [style*="repeat(4, minmax(0, 1fr)"],
-  .patient-content [style*="repeat(3, minmax(0, 1fr)"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  /* wide tables scroll horizontally inside their card instead of
-     overflowing the screen (replaces the old min-width:720px hack) */
-  .patient-content table {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
-  /* comfortable tap targets */
-  .patient-content button,
-  .patient-content a[role="button"] { min-height: 40px; }
-
-  /* never let a stray element force the page wider than the screen */
-  .patient-content { overflow-x: hidden; }
-  .patient-content img { max-width: 100%; height: auto; }
+/* Phone-specific adaptations; screen structure remains with each CSS module. */
+.patient-content > *, .patient-content section, .patient-content form { min-width: 0; }
+.patient-content input:not([type="checkbox"]):not([type="radio"]), .patient-content select, .patient-content textarea { min-height: 44px; }
+.patient-content img { max-width: 100%; height: auto; }
+@media (max-width: 640px) {
+  .patient-content { overflow-wrap: anywhere; }
+  .qc-rtable, .qc-rtable tbody, .qc-rtable tr, .qc-rtable td { display: block; width: auto; min-width: 0 !important; }
+  .qc-rtable thead { display: none; }
+  .qc-rtable tr { margin: 0 12px 12px; border: 1px solid var(--rule) !important; border-radius: var(--radius-panel); background: var(--surface); overflow: hidden; }
+  .qc-rtable td { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 12px !important; border: none !important; text-align: right; white-space: normal !important; }
+  .qc-rtable td + td { border-top: 1px solid var(--rule) !important; }
+  .qc-rtable td::before { content: attr(data-label); flex: 0 0 35%; color: var(--ink-3); font-size: 10px; font-weight: 600; letter-spacing: .04em; text-align: left; text-transform: uppercase; }
+  .qc-rtable td.qc-td-block { display: block; text-align: left; }
+  .qc-rtable td.qc-td-block::before { display: block; margin-bottom: 6px; }
+  .qc-actions { flex-wrap: wrap; }
 }

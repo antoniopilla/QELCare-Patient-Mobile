@@ -7,9 +7,12 @@ import {
   Field,
   LoadingState,
   Panel,
-  inputStyle,
   todayISO,
 } from "../Workflow/ClinicUi";
+import { Input, Select, Textarea } from "../ui/Field";
+import { InlineAlert } from "../ui/InlineAlert";
+import { StatusMark } from "../ui/StatusMark";
+import styles from "./UserBooking.module.css";
 
 const APPOINTMENT_TYPES = [
   { value: "consultation", label: "Consultation" },
@@ -224,17 +227,6 @@ function outsideClinicHours(time) {
   if (!t) return false;
   return t < CLINIC_OPEN || t > CLINIC_CLOSE;
 }
-
-const segmentedButton = (active) => ({
-  minHeight: 38,
-  borderRadius: 8,
-  border: `1px solid ${active ? "#163a6b" : "#d7e2ef"}`,
-  background: active ? "#163a6b" : "#fff",
-  color: active ? "#fff" : "#163a6b",
-  cursor: "pointer",
-  fontWeight: 900,
-  fontFamily: "inherit",
-});
 
 export default function UserBooking({ onViewAppointments, onBooked }) {
   const [doctors, setDoctors] = useState([]);
@@ -514,70 +506,70 @@ export default function UserBooking({ onViewAppointments, onBooked }) {
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.1fr) minmax(280px, .9fr)", gap: 16, alignItems: "start" }}>
-      <Panel style={{ padding: 18 }}>
-        <form onSubmit={submit} style={{ display: "grid", gap: 14 }}>
+    <div className={styles.bookingLayout}>
+      <Panel className={styles.formPanel}>
+        <form onSubmit={submit} className={styles.form}>
           <div>
-            <div style={{ fontSize: 17, fontWeight: 900, color: "#162235" }}>Book Appointment</div>
-            <div style={{ fontSize: 13, color: "#6b778c", marginTop: 3 }}>Choose a doctor, schedule, patient, and reason for visit.</div>
+            <div className={styles.title}>Book Appointment</div>
+            <div className={styles.description}>Choose a doctor, schedule, patient, and reason for visit.</div>
           </div>
 
           <ErrorState message={error} />
-          {message && <div style={{ padding: "10px 12px", borderRadius: 8, background: "#edf8f1", color: "#0f6b3c", fontSize: 13, fontWeight: 800 }}>{message}</div>}
+          {message && <InlineAlert tone="success" message={message} />}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            <button type="button" style={segmentedButton(form.booked_for === "self")} onClick={() => updateField("booked_for", "self")}>Myself</button>
-            <button type="button" style={segmentedButton(form.booked_for === "other")} onClick={() => updateField("booked_for", "other")}>Someone else</button>
+          <div className={styles.patientSelector}>
+            <button type="button" className={[styles.patientOption, form.booked_for === "self" && styles.patientOptionActive].filter(Boolean).join(" ")} aria-pressed={form.booked_for === "self"} onClick={() => updateField("booked_for", "self")}>Myself</button>
+            <button type="button" className={[styles.patientOption, form.booked_for === "other" && styles.patientOptionActive].filter(Boolean).join(" ")} aria-pressed={form.booked_for === "other"} onClick={() => updateField("booked_for", "other")}>Someone else</button>
           </div>
 
           {form.booked_for === "other" && (
-            <Panel style={{ padding: 14, background: "#f8fbff" }}>
-              <div style={{ display: "grid", gap: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <div style={{ color: "#162235", fontSize: 13, fontWeight: 900 }}>Relative information</div>
+            <Panel className={styles.relativePanel}>
+              <div className={styles.relativeFields}>
+                <div className={styles.relativeHeading}>
+                  <div className={styles.sectionTitle}>Relative information</div>
                   {relatives.length > 0 && (
-                    <select style={{ ...inputStyle, maxWidth: 240 }} value={selectedRelativeId} onChange={(e) => pickRelative(e.target.value)}>
+                    <Select aria-label="Choose a saved relative" className={styles.relativePicker} value={selectedRelativeId} onChange={(e) => pickRelative(e.target.value)}>
                       <option value="">+ Add a new person</option>
                       {relatives.map((r) => (
                         <option key={r.relative_id} value={r.relative_id}>{r.first_name} {r.last_name} ({r.relationship})</option>
                       ))}
-                    </select>
+                    </Select>
                   )}
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div className={styles.nameGrid}>
                   <Field label="First name">
-                    <input style={inputStyle} value={form.relative.first_name} onChange={(e) => updateRelative("first_name", e.target.value)} />
+                    <Input value={form.relative.first_name} onChange={(e) => updateRelative("first_name", e.target.value)} />
                   </Field>
                   <Field label="Last name">
-                    <input style={inputStyle} value={form.relative.last_name} onChange={(e) => updateRelative("last_name", e.target.value)} />
+                    <Input value={form.relative.last_name} onChange={(e) => updateRelative("last_name", e.target.value)} />
                   </Field>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 140px", gap: 10 }}>
+                <div className={styles.relationshipGrid}>
                   <Field label="Relationship">
-                    <input style={inputStyle} value={form.relative.relationship} onChange={(e) => updateRelative("relationship", e.target.value)} placeholder="Parent, child, spouse" />
+                    <Input value={form.relative.relationship} onChange={(e) => updateRelative("relationship", e.target.value)} placeholder="Parent, child, spouse" />
                   </Field>
                   <Field label="Birth date">
-                    <input style={inputStyle} type="date" value={form.relative.date_of_birth} onChange={(e) => updateRelative("date_of_birth", e.target.value)} />
+                    <Input type="date" value={form.relative.date_of_birth} onChange={(e) => updateRelative("date_of_birth", e.target.value)} />
                   </Field>
                   <Field label="Age">
-                    <input style={inputStyle} type="number" min="0" max="130" value={form.relative.age} onChange={(e) => updateRelative("age", e.target.value)} />
+                    <Input type="number" min="0" max="130" value={form.relative.age} onChange={(e) => updateRelative("age", e.target.value)} />
                   </Field>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "150px 1fr 1fr", gap: 10 }}>
+                <div className={styles.contactGrid}>
                   <Field label="Gender">
-                    <select style={inputStyle} value={form.relative.gender} onChange={(e) => updateRelative("gender", e.target.value)}>
+                    <Select value={form.relative.gender} onChange={(e) => updateRelative("gender", e.target.value)}>
                       {GENDERS.map((gender) => <option key={gender || "blank"} value={gender}>{gender || "Select"}</option>)}
-                    </select>
+                    </Select>
                   </Field>
                   <Field label="Phone">
-                    <input style={inputStyle} value={form.relative.phone} onChange={(e) => updateRelative("phone", e.target.value)} />
+                    <Input value={form.relative.phone} onChange={(e) => updateRelative("phone", e.target.value)} />
                   </Field>
                   <Field label="Email">
-                    <input style={inputStyle} type="email" value={form.relative.email} onChange={(e) => updateRelative("email", e.target.value)} />
+                    <Input type="email" value={form.relative.email} onChange={(e) => updateRelative("email", e.target.value)} />
                   </Field>
                 </div>
                 {!selectedRelativeId && (
-                  <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 700, color: "#42526a", cursor: "pointer" }}>
+                  <label className={styles.saveRelative}>
                     <input type="checkbox" checked={saveRelative} onChange={(e) => setSaveRelative(e.target.checked)} />
                     Save this person to my relatives for next time
                   </label>
@@ -593,57 +585,56 @@ export default function UserBooking({ onViewAppointments, onBooked }) {
           ) : (
             <>
               <Field label="Department">
-                <select style={inputStyle} value={form.specialty_id} onChange={(e) => selectDepartment(e.target.value)}>
+                <Select value={form.specialty_id} onChange={(e) => selectDepartment(e.target.value)}>
                   <option value="">Select a department</option>
                   {departments.map((dep) => (
                     <option key={dep.specialty_id} value={dep.specialty_id}>{dep.specialty_name}</option>
                   ))}
-                </select>
+                </Select>
               </Field>
 
               <Field label="Doctor">
-                <select style={inputStyle} value={form.doctor_id} onChange={(e) => updateField("doctor_id", e.target.value)} disabled={!form.specialty_id}>
+                <Select value={form.doctor_id} onChange={(e) => updateField("doctor_id", e.target.value)} disabled={!form.specialty_id}>
                   <option value="">{form.specialty_id ? "Select doctor" : "Select a department first"}</option>
                   {departmentDoctors.map((doctor) => (
                     <option key={doctor.user_id} value={doctor.user_id}>
                       {doctor.doctor_name || `${doctor.first_name} ${doctor.last_name}`}
                     </option>
                   ))}
-                </select>
+                </Select>
                 {form.specialty_id && departmentDoctors.length === 0 && (
-                  <div style={{ fontSize: 11, color: "#9a6500", marginTop: 4 }}>No available doctor in this department yet.</div>
+                  <div className={styles.fieldHint}>No available doctor in this department yet.</div>
                 )}
               </Field>
 
               {selectedDoctor && (
-                <div style={{ padding: 12, borderRadius: 8, background: "#f7fafd", border: "1px solid #e3ebf5", color: "#42526a", fontSize: 13 }}>
-                  <strong style={{ color: "#162235" }}>{selectedDoctor.doctor_name || `${selectedDoctor.first_name} ${selectedDoctor.last_name}`}</strong>
-                  <div>{selectedDoctor.specialty_name}</div>
+                <div className={styles.doctorContext}>
+                  <strong className={styles.doctorName}>{selectedDoctor.doctor_name || `${selectedDoctor.first_name} ${selectedDoctor.last_name}`}</strong>
+                  <div className={styles.doctorSpecialty}>{selectedDoctor.specialty_name}</div>
                 </div>
               )}
             </>
           )}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 160px", gap: 10 }}>
+          <div className={styles.scheduleGrid}>
             <Field label="Date">
-              <input style={inputStyle} type="date" min={todayISO()} value={form.date} onChange={(e) => updateField("date", e.target.value)} />
+              <Input type="date" min={todayISO()} value={form.date} onChange={(e) => updateField("date", e.target.value)} />
             </Field>
             <Field label="Time">
-              <input style={inputStyle} type="time" min={minTimeFor(form.date)} max={CLINIC_CLOSE} value={form.time} onChange={(e) => updateField("time", e.target.value)} />
-              <div style={{ fontSize: 11, color: "#8a97a8", marginTop: 4 }}>Clinic hours: 8:00 AM – 8:00 PM</div>
+              <Input type="time" min={minTimeFor(form.date)} max={CLINIC_CLOSE} value={form.time} onChange={(e) => updateField("time", e.target.value)} />
+              <div className={styles.fieldHint}>Clinic hours: 8:00 AM – 8:00 PM</div>
             </Field>
             <Field label="Type">
-              <select style={inputStyle} value={form.type} onChange={(e) => updateField("type", e.target.value)}>
+              <Select value={form.type} onChange={(e) => updateField("type", e.target.value)}>
                 {APPOINTMENT_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>{type.label}</option>
                 ))}
-              </select>
+              </Select>
             </Field>
           </div>
 
           <Field label="Chief complaint">
-            <select
-              style={inputStyle}
+            <Select
               value={complaintChoice}
               onChange={(e) => selectComplaint(e.target.value)}
               disabled={!form.specialty_id}
@@ -652,17 +643,16 @@ export default function UserBooking({ onViewAppointments, onBooked }) {
                 {form.specialty_id ? "Select your main concern" : "Select a department first"}
               </option>
               {complaintOptions.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
+            </Select>
             {form.specialty_id && (
-              <div style={{ fontSize: 11, color: "#8a97a8", marginTop: 4 }}>
+              <div className={styles.fieldHint}>
                 Showing concerns commonly handled by {selectedDepartmentName}.
               </div>
             )}
           </Field>
           {complaintChoice === "Other" && (
             <Field label="Please specify your concern">
-              <input
-                style={inputStyle}
+              <Input
                 value={form.chief_complaint}
                 onChange={(e) => updateField("chief_complaint", e.target.value)}
                 placeholder="Describe your concern"
@@ -671,15 +661,15 @@ export default function UserBooking({ onViewAppointments, onBooked }) {
           )}
 
           <Field label="Notes">
-            <textarea
-              style={{ ...inputStyle, minHeight: 70, resize: "vertical" }}
+            <Textarea
+              className={styles.notes}
               value={form.notes}
               onChange={(e) => updateField("notes", e.target.value)}
               placeholder="Optional details"
             />
           </Field>
 
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div className={styles.formActions}>
             <ActionButton type="submit" disabled={loading || submitting || doctors.length === 0}>{submitting ? "Booking..." : "Book Appointment"}</ActionButton>
             <ActionButton tone="secondary" onClick={onViewAppointments || (() => { window.location.href = "/patient/appointments"; })}>
               View Appointments
@@ -688,27 +678,25 @@ export default function UserBooking({ onViewAppointments, onBooked }) {
         </form>
       </Panel>
 
-      <Panel style={{ padding: 18 }}>
-        <div style={{ fontSize: 15, fontWeight: 900, color: "#162235" }}>Clinic Specialty Coverage</div>
-        <div style={{ fontSize: 12, color: "#6b778c", marginTop: 2, marginBottom: 12 }}>Departments become bookable when a verified doctor is assigned by admin.</div>
+      <Panel className={styles.coveragePanel}>
+        <div className={styles.sectionTitle}>Clinic Specialty Coverage</div>
+        <div className={styles.coverageDescription}>Departments become bookable when a verified doctor is assigned by admin.</div>
         {loading ? (
           <LoadingState />
         ) : specialtyCards.length === 0 ? (
           <EmptyState title="No active specialties" detail="Admin must set active specialties before patients can book." />
         ) : (
-          <div style={{ display: "grid", gap: 8 }}>
+          <div className={styles.specialties}>
             {specialtyCards.map((specialty) => {
               const hasDoctors = Number(specialty.doctor_count || 0) > 0;
               return (
-                <div key={specialty.specialty_id || specialty.specialty_name} style={{ border: `1px solid ${hasDoctors ? "#e3ebf5" : "#f0d7c2"}`, borderRadius: 8, padding: 12, background: hasDoctors ? "#fff" : "#fff8f3" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
-                    <div style={{ fontWeight: 900, color: "#162235" }}>{specialty.specialty_name}</div>
-                    <span style={{ borderRadius: 999, padding: "3px 8px", fontSize: 11, fontWeight: 900, color: hasDoctors ? "#0f6b3c" : "#9a6500", background: hasDoctors ? "#eaf7ef" : "#fff0d5" }}>
-                      {hasDoctors ? "Bookable" : "Needs doctor"}
-                    </span>
+                <div key={specialty.specialty_id || specialty.specialty_name} className={styles.specialtyCard}>
+                  <div className={styles.specialtyHeading}>
+                    <div className={styles.specialtyName}>{specialty.specialty_name}</div>
+                    <StatusMark status={hasDoctors ? "Bookable" : "Needs doctor"} />
                   </div>
-                  <div style={{ color: "#6b778c", fontSize: 12, marginTop: 4 }}>
-                    {Number(specialty.doctor_count || 0)} verified doctor(s)
+                  <div className={styles.specialtyCount}>
+                    <span className={styles.numeric}>{Number(specialty.doctor_count || 0)}</span> verified doctor(s)
                   </div>
                 </div>
               );

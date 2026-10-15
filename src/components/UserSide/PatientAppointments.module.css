@@ -1,0 +1,101 @@
+.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-24); min-width: 0; }
+.tabsPanel { overflow: hidden; }
+.workspaceHeading { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-8); padding: var(--space-16) var(--space-24); border-bottom: 1px solid var(--rule); background: var(--pine-50); }
+.workspaceHeading .eyebrow { margin: 0; color: var(--brass-ink); font-size: .625rem; }
+.workspaceHeading > span:last-child { color: var(--ink-2); font-size: .6875rem; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: var(--space-12); flex-wrap: wrap; padding: var(--space-12) var(--space-16); }
+.tabs { display: flex; gap: var(--space-4); flex-wrap: wrap; }
+.tabButton { position: relative; min-height: calc(var(--space-32) + var(--space-8)); padding: var(--space-8) var(--space-16); border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--ink-2); font-family: var(--font-ui); font-size: .75rem; font-weight: 500; cursor: pointer; transition: color var(--dur-1), background-color var(--dur-1), border-color var(--dur-1); }
+.tabButton:hover { background: var(--paper); color: var(--pine); }
+.tabActive, .tabActive:hover { background: var(--pine-wash); color: var(--pine); border-color: var(--rule); box-shadow: inset 0 -2px 0 var(--brass); font-weight: 600; }
+.formPanel { padding: var(--space-24); }
+.sectionTitle, .savedTitle { color: var(--ink); font-family: var(--font-display); font-size: 1.5rem; font-weight: 500; line-height: 1.25; margin: 0; }
+.savedTitle { margin-bottom: var(--space-16); }
+.sectionDescription { margin: var(--space-8) 0 var(--space-16); color: var(--ink-3); font-size: .8125rem; line-height: 1.6; }
+.formFields { display: grid; gap: var(--space-12); }
+.nameGrid, .relationshipGrid, .contactGrid { display: grid; gap: var(--space-12); min-width: 0; }
+.nameGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.relationshipGrid { grid-template-columns: minmax(0, 1fr) 150px 110px; }
+.contactGrid { grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr); }
+.formActions, .dialogActions, .relativeActions, .rowActions { display: flex; gap: var(--space-8); }
+.formActions { flex-wrap: wrap; }
+.dialogActions { justify-content: flex-end; flex-wrap: wrap; margin-top: var(--space-4); }
+.relativeActions { align-items: flex-start; }
+.fieldHint { margin-top: var(--space-4); color: var(--ink-3); font-size: .75rem; line-height: 1.5; }
+.relativeMessage { margin-bottom: var(--space-12); }
+.relativeCard { display: flex; justify-content: space-between; gap: var(--space-12); flex-wrap: wrap; padding: var(--space-16); border: 1px solid var(--rule); border-radius: var(--radius-control); background: var(--paper); }
+.relativeCopy { min-width: 0; }
+.relativeName, .patientName, .doctorName { color: var(--ink); font-weight: 600; }
+.relativeName { font-family: var(--font-display); font-size: 1.25rem; font-weight: 500; }
+.relativeDetail, .relativeContact { margin-top: var(--space-4); font-size: .8125rem; line-height: 1.5; overflow-wrap: anywhere; }
+.relativeDetail { color: var(--ink-3); }
+.relativeContact { color: var(--ink-2); }
+.reference { font-family: var(--font-mono); font-size: .8125rem; font-variant-numeric: tabular-nums; color: var(--ink-3); }
+.visitPanel { padding: var(--space-32); background: var(--surface); border-left: 4px solid var(--brass); }
+.visitHeading { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-16); flex-wrap: wrap; }
+.eyebrow { margin-bottom: var(--space-8); color: var(--ink-3); font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.visitTitle { color: var(--ink); font-family: var(--font-display); font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+.visitSpecialty { margin-top: var(--space-8); color: var(--ink-2); font-size: .875rem; }
+.visitDetails { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); gap: var(--space-24); margin: var(--space-24) 0; }
+.visitDetails dt { margin-bottom: var(--space-4); color: var(--ink-3); font-size: .75rem; }
+.visitDetails dd { margin: 0; color: var(--ink); font-size: .875rem; line-height: 1.5; overflow-wrap: anywhere; }
+.visitThread { padding-top: var(--space-24); border-top: 1px solid var(--rule); }
+.editOverlay { position: fixed; inset: 0; z-index: 600; display: grid; place-items: center; padding: var(--space-16); background: color-mix(in srgb, var(--ink) 35%, transparent); overflow-y: auto; }
+.editDialog { width: min(480px, 94vw); max-height: calc(100dvh - var(--space-32)); overflow-y: auto; border-radius: var(--radius-panel); border-top: 3px solid var(--brass); box-shadow: var(--shadow-pop); }
+.tablePanel { overflow: hidden; }
+.tableHeading { display: flex; justify-content: space-between; gap: var(--space-12); padding: var(--space-24); border-bottom: 1px solid var(--rule); background: var(--pine-50); }
+.tableDescription { margin-top: var(--space-4); color: var(--ink-3); font-size: .8125rem; line-height: 1.5; }
+.tableViewport { max-height: 60vh; overflow: auto; min-width: 0; }
+.table { width: 100%; border-collapse: separate; border-spacing: 0; color: var(--ink); font-size: .8125rem; }
+.table th { position: sticky; top: 0; z-index: 1; padding: var(--space-12) var(--space-16); border-bottom: 1px solid var(--rule); background: var(--surface); text-align: left; color: var(--ink-2); font-size: .75rem; font-weight: 600; white-space: nowrap; }
+.table td { padding: var(--space-12) var(--space-16); border-bottom: 1px solid var(--rule); background: var(--surface); text-align: left; vertical-align: middle; }
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr:hover td { background: var(--pine-50); }
+.table td[data-label="Patient"] { min-width: 180px; }
+.rowActions:not(:has(button)) { opacity: 1; }
+.table .numeric { text-align: right; color: var(--ink-3); font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.patientContact { margin-top: var(--space-4); color: var(--ink-3); font-size: .75rem; overflow-wrap: anywhere; }
+.bookedFor { color: var(--ink-2); }
+.schedule { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.statusCell { min-width: 200px; }
+.detailsCell { min-width: 180px; color: var(--ink-2); }
+.detailText { font-size: .8125rem; line-height: 1.5; }
+.actionsCell { white-space: nowrap; }
+.clinicContact { display: inline-block; max-width: 210px; color: var(--ink-3); font-size: .75rem; line-height: 1.5; white-space: normal; }
+
+@media (max-width: 640px) {
+  .page { gap: var(--space-16); }
+  .formPanel, .tableHeading { padding: var(--space-16); }
+  .workspaceHeading { padding: var(--space-16); }
+  .workspaceHeading > span:last-child { display: none; }
+  .toolbar { padding: var(--space-12); }
+  .tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .tabButton { padding: var(--space-8) var(--space-12); }
+  .nameGrid, .relationshipGrid, .contactGrid, .visitDetails { grid-template-columns: minmax(0, 1fr); }
+  .visitPanel { padding: var(--space-24) var(--space-16); }
+  .visitDetails { gap: var(--space-12); margin: var(--space-24) 0; }
+  .tableViewport { max-height: none; overflow: visible; padding-top: var(--space-12); }
+  .table tr { border-color: var(--rule) !important; border-radius: var(--radius-control); background: var(--surface); }
+  .table td { background: var(--surface); }
+  .table td + td { border-top-color: var(--rule) !important; }
+  .table td::before { color: var(--ink-3); font-family: var(--font-ui); font-weight: 600; }
+  .table .numeric { white-space: normal; }
+  .relativeActions { flex-wrap: wrap; }
+}
+
+@media (max-width: 480px) {
+  .visitPanel { padding-inline: var(--space-12); }
+  .visitThread li > span:last-child { font-size: .6875rem; }
+}
+
+/* Keep the existing appointment editor in reach above the phone keyboard. */
+@media (max-width: 640px) {
+  .editOverlay { align-items: end; padding: var(--space-12) var(--space-12) max(var(--space-12), env(safe-area-inset-bottom)); }
+  .editDialog { width: 100%; max-height: calc(100dvh - var(--space-24)); border-radius: var(--radius-panel) var(--radius-panel) var(--radius-control) var(--radius-control); }
+}
+
+.editOverlay { animation: backdropEnter var(--dur-2) var(--ease-out); }
+.editDialog { animation: dialogEnter var(--dur-2) var(--ease-out); }
+@keyframes backdropEnter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dialogEnter { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .editOverlay, .editDialog { animation: none; } .tabButton { transition: none; } }

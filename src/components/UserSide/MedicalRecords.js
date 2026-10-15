@@ -11,11 +11,13 @@ import {
   formatDate,
   formatTime,
   getRows,
-  inputStyle,
   todayISO,
 } from "../Workflow/ClinicUi";
 import Pagination, { usePagination } from "../common/Pagination";
 import { manilaDateOf } from "../../utils/manilaDate";
+import { Stamp } from "../ui";
+import PatientIdentity from "../ui/PatientIdentity";
+import styles from "./MedicalRecords.module.css";
 
 const blankRecord = {
   patient_id: "",
@@ -52,6 +54,7 @@ function buildFormFromAppointment(appointment, latestVital) {
   };
 }
 
+/** @param {{appointment?: any, latestVital?: any, onCreated?: (record: any) => void}} props */
 export default function MedicalRecords({ appointment, latestVital, onCreated }) {
   const role = getUserRole();
   const isPatient = role === "Patient";
@@ -195,22 +198,22 @@ export default function MedicalRecords({ appointment, latestVital, onCreated }) 
   }
 
   return (
-    <div style={{ display: "grid", gap: 14 }}>
+    <div className={styles.page}>
       <ErrorState message={error} />
       {message && (
-        <div style={{ padding: "10px 12px", borderRadius: 8, background: "#edf8f1", color: "#0f6b3c", fontSize: 13, fontWeight: 800 }}>
+        <div className={styles.success}>
           {message}
         </div>
       )}
 
       {canCreate && (
-        <Panel style={{ padding: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
+        <Panel className={styles.formPanel}>
+          <div className={styles.formHeader}>
             <div>
-              <div style={{ fontWeight: 900, color: "#162235" }}>
+              <div className={styles.formTitle}>
                 {isConsultationEntry ? "Consultation Record" : "Doctor Record Entry"}
               </div>
-              <div style={{ color: "#6b778c", fontSize: 13 }}>
+              <div className={styles.meta}>
                 Save diagnosis, treatment plan, prescriptions, and requested procedures after consultation.
               </div>
             </div>
@@ -222,16 +225,16 @@ export default function MedicalRecords({ appointment, latestVital, onCreated }) 
           </div>
 
           {showForm && (
-            <form onSubmit={submit} style={{ display: "grid", gap: 12, marginTop: 14 }}>
+            <form onSubmit={submit} className={styles.form}>
               {isConsultationEntry ? (
-                <div style={{ padding: 12, border: "1px solid #e3ebf5", borderRadius: 8, background: "#f7fafd", fontSize: 13, color: "#42526a" }}>
-                  <strong style={{ color: "#162235" }}>{appointment.patient_name}</strong>
+                <div className={styles.visitNotice}>
+                  <strong className={styles.strong}>{appointment.patient_name}</strong>
                   <span> - Appointment #{appointment.id} - {formatDate(appointment.date)} {formatTime(appointment.time)}</span>
                 </div>
               ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 120px 120px", gap: 10 }}>
+                <div className={styles.legacyVisitGrid}>
                   <Field label="Appointment">
-                    <select style={inputStyle} value={form.appointment_id} onChange={(e) => updateField("appointment_id", e.target.value)}>
+                    <select className={styles.control} value={form.appointment_id} onChange={(e) => updateField("appointment_id", e.target.value)}>
                       <option value="">No appointment link</option>
                       {appointments.map((item) => (
                         <option key={item.id} value={item.id}>
@@ -241,80 +244,80 @@ export default function MedicalRecords({ appointment, latestVital, onCreated }) 
                     </select>
                   </Field>
                   <Field label="Patient ID">
-                    <input style={inputStyle} value={form.patient_id} onChange={(e) => updateField("patient_id", e.target.value)} />
+                    <input className={styles.control} value={form.patient_id} onChange={(e) => updateField("patient_id", e.target.value)} />
                   </Field>
                   <Field label="Visit date">
-                    <input style={inputStyle} type="date" value={form.visit_date} onChange={(e) => updateField("visit_date", e.target.value)} />
+                    <input className={styles.control} type="date" value={form.visit_date} onChange={(e) => updateField("visit_date", e.target.value)} />
                   </Field>
                 </div>
               )}
 
               {selectedAppointment && !isConsultationEntry && (
-                <div style={{ padding: 12, border: "1px solid #e3ebf5", borderRadius: 8, background: "#f7fafd", fontSize: 13, color: "#42526a" }}>
-                  <strong style={{ color: "#162235" }}>{selectedAppointment.patient_name}</strong> with {selectedAppointment.doctor_name} ({selectedAppointment.specialty_name || "No specialty"})
+                <div className={styles.visitNotice}>
+                  <strong className={styles.strong}>{selectedAppointment.patient_name}</strong> with {selectedAppointment.doctor_name} ({selectedAppointment.specialty_name || "No specialty"})
                 </div>
               )}
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div className={styles.formGrid}>
                 <Field label="Chief complaint">
-                  <textarea style={{ ...inputStyle, minHeight: 72 }} value={form.chief_complaint} onChange={(e) => updateField("chief_complaint", e.target.value)} />
+                  <textarea className={styles.textareaShort} value={form.chief_complaint} onChange={(e) => updateField("chief_complaint", e.target.value)} />
                 </Field>
                 <Field label="History of illness">
-                  <textarea style={{ ...inputStyle, minHeight: 72 }} value={form.history_of_illness} onChange={(e) => updateField("history_of_illness", e.target.value)} />
+                  <textarea className={styles.textareaShort} value={form.history_of_illness} onChange={(e) => updateField("history_of_illness", e.target.value)} />
                 </Field>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div className={styles.formGrid}>
                 <Field label="Physical exam">
-                  <textarea style={{ ...inputStyle, minHeight: 78 }} value={form.physical_exam} onChange={(e) => updateField("physical_exam", e.target.value)} />
+                  <textarea className={styles.textarea} value={form.physical_exam} onChange={(e) => updateField("physical_exam", e.target.value)} />
                 </Field>
                 <Field label="Diagnosis">
-                  <textarea style={{ ...inputStyle, minHeight: 78 }} value={form.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} />
+                  <textarea className={styles.textarea} value={form.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} />
                 </Field>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div className={styles.formGrid}>
                 <Field label="Treatment plan">
-                  <textarea style={{ ...inputStyle, minHeight: 86 }} value={form.treatment_plan} onChange={(e) => updateField("treatment_plan", e.target.value)} />
+                  <textarea className={styles.textareaTall} value={form.treatment_plan} onChange={(e) => updateField("treatment_plan", e.target.value)} />
                 </Field>
                 <Field label="Prescriptions">
-                  <textarea style={{ ...inputStyle, minHeight: 86 }} value={form.prescriptions} onChange={(e) => updateField("prescriptions", e.target.value)} />
+                  <textarea className={styles.textareaTall} value={form.prescriptions} onChange={(e) => updateField("prescriptions", e.target.value)} />
                 </Field>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div className={styles.formGrid}>
                 <Field label="Requested procedures or labs">
                   {canCreate && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                    <div className={styles.tests}>
                       {COMMON_TESTS.map((t) => (
                         <button
                           key={t}
                           type="button"
                           onClick={() => addTest(t)}
-                          style={{ border: "1px solid #d7e2ef", background: "#f1f6fc", color: "#163a6b", borderRadius: 999, padding: "4px 11px", fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}
+                          className={styles.testButton}
                         >
                           + {t}
                         </button>
                       ))}
                     </div>
                   )}
-                  <textarea style={{ ...inputStyle, minHeight: 78 }} value={form.lab_requests} onChange={(e) => updateField("lab_requests", e.target.value)} placeholder="Click a test above to add it, or type specific labs/exams (e.g. CBC, Fecalysis, Eyesight)" />
+                  <textarea className={styles.textarea} value={form.lab_requests} onChange={(e) => updateField("lab_requests", e.target.value)} placeholder="Click a test above to add it, or type specific labs/exams (e.g. CBC, Fecalysis, Eyesight)" />
                 </Field>
                 <Field label="Doctor notes">
-                  <textarea style={{ ...inputStyle, minHeight: 78 }} value={form.doctor_notes} onChange={(e) => updateField("doctor_notes", e.target.value)} />
+                  <textarea className={styles.textarea} value={form.doctor_notes} onChange={(e) => updateField("doctor_notes", e.target.value)} />
                 </Field>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "170px 1fr", gap: 10 }}>
+              <div className={styles.followUpGrid}>
                 <Field label="Follow-up date">
-                  <input style={inputStyle} type="date" value={form.follow_up_date} onChange={(e) => updateField("follow_up_date", e.target.value)} />
+                  <input className={styles.control} type="date" value={form.follow_up_date} onChange={(e) => updateField("follow_up_date", e.target.value)} />
                 </Field>
                 <Field label="Follow-up notes">
-                  <input style={inputStyle} value={form.follow_up_notes} onChange={(e) => updateField("follow_up_notes", e.target.value)} />
+                  <input className={styles.control} value={form.follow_up_notes} onChange={(e) => updateField("follow_up_notes", e.target.value)} />
                 </Field>
               </div>
 
-              <div style={{ display: "flex", gap: 8 }}>
+              <div className={styles.actions}>
                 <ActionButton type="submit" disabled={saving}>{saving ? "Saving..." : isConsultationEntry ? "Save Record and Complete Visit" : "Add Record"}</ActionButton>
                 {!isConsultationEntry && <ActionButton tone="secondary" onClick={() => setShowForm(false)}>Cancel</ActionButton>}
               </div>
@@ -323,10 +326,10 @@ export default function MedicalRecords({ appointment, latestVital, onCreated }) 
         </Panel>
       )}
 
-      <Panel style={{ overflow: "hidden" }}>
-        <div style={{ padding: "14px 16px", borderBottom: "1px solid #e8eef6" }}>
-          <div style={{ fontSize: 15, fontWeight: 900, color: "#162235" }}>{isPatient ? "Consultation Records" : "Medical Records"}</div>
-          <div style={{ fontSize: 12, color: "#6b778c", marginTop: 2 }}>{records.length} record(s)</div>
+      <Panel className={styles.recordsPanel}>
+        <div className={styles.recordsHeader}>
+          <div className={styles.recordsTitle}>{isPatient ? "Consultation Records" : "Medical Records"}</div>
+          <div className={styles.recordCount}>{records.length} record(s)</div>
         </div>
 
         {loading ? (
@@ -334,43 +337,9 @@ export default function MedicalRecords({ appointment, latestVital, onCreated }) 
         ) : records.length === 0 ? (
           <EmptyState title="No records found" detail={isPatient ? "Completed doctor records will show here." : "Patient history will appear here after records are created."} />
         ) : (
-          <div style={{ display: "grid" }}>
+          <div className={styles.records}>
             {pageItems.map((record) => (
-              <article key={record.record_id || record.id} style={{ padding: 16, borderTop: "1px solid #eef3f9", display: "grid", gap: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                  <div>
-                    <div style={{ fontWeight: 900, color: "#162235" }}>{record.diagnosis || "No diagnosis entered"}</div>
-                    <div style={{ color: "#6b778c", fontSize: 13 }}>
-                      {record.patient_name || "Patient"} - {record.doctor_name || "Doctor"} - {formatDate(record.visit_date || record.appointment_date)}
-                    </div>
-                    {/* The doctor changed this record after the visit was paid: tell the patient, and when. */}
-                    {record.amended_at && (
-                      <div style={{ color: "#9a6500", fontSize: 12, fontWeight: 800, marginTop: 3 }}>
-                        Amended on {formatDate(manilaDateOf(record.amended_at))}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <StatusBadge status={record.appointment_status || "COMPLETED"} />
-                    {record.amended_at && (
-                      <span style={{ padding: "3px 9px", borderRadius: 999, background: "#fff4de", color: "#9a6500", fontSize: 11, fontWeight: 900 }}>Amended</span>
-                    )}
-                  </div>
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
-                  <RecordBlock label="Chief complaint" value={record.chief_complaint} />
-                  <RecordBlock label="Physical exam" value={record.physical_exam} />
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
-                  <RecordBlock label="Treatment" value={record.treatment_plan} />
-                  <RecordBlock label="Prescription" value={record.prescriptions || record.prescription} />
-                  <RecordBlock label="Requested procedures" value={record.lab_requests} />
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
-                  <RecordBlock label="Follow-up" value={record.follow_up_date_text || record.follow_up_date} formatter={formatDate} />
-                  <RecordBlock label="Doctor notes" value={record.doctor_notes} />
-                </div>
-              </article>
+              <RecordCard key={record.record_id || record.id} record={record} />
             ))}
           </div>
         )}
@@ -388,12 +357,56 @@ export default function MedicalRecords({ appointment, latestVital, onCreated }) 
   );
 }
 
+function recordRef(id) {
+  return `MR-${String(id).padStart(5, "0")}`;
+}
+
+/** @param {{label: string, value?: any, formatter?: (value: any) => import('react').ReactNode}} props */
 function RecordBlock({ label, value, formatter }) {
   const display = formatter && value ? formatter(value) : value;
   return (
-    <div style={{ border: "1px solid #e8eef6", borderRadius: 8, padding: 10, minWidth: 0 }}>
-      <div style={{ fontSize: 11, color: "#6b778c", fontWeight: 900, textTransform: "uppercase" }}>{label}</div>
-      <div style={{ marginTop: 4, color: "#162235", fontSize: 13, whiteSpace: "pre-wrap" }}>{display || "-"}</div>
+    <div className={styles.recordBlock}>
+      <div className={styles.blockLabel}>{label}</div>
+      <div className={styles.blockValue}>{display || "-"}</div>
     </div>
+  );
+}
+
+function RecordCard({ record }) {
+  return (
+    <article className={styles.recordCard}>
+      <div className={styles.recordHeader}>
+        <div>
+          <div className={styles.recordRef}>{recordRef(record.record_id || record.id)}</div>
+          <div className={styles.recordTitle}>{record.diagnosis || "No diagnosis entered"}</div>
+          <div className={styles.meta}>
+            <PatientIdentity name={record.patient_name || "Patient"}>{record.patient_name || "Patient"} - {record.doctor_name || "Doctor"} - {formatDate(record.visit_date || record.appointment_date)}</PatientIdentity>
+          </div>
+          {/* Show the same amendment notice already available in mobile records. */}
+          {record.amended_at && (
+            <div className={styles.amendmentDetail}>
+              Amended on {formatDate(manilaDateOf(record.amended_at))}
+            </div>
+          )}
+        </div>
+        <div className={styles.recordActions}>
+          <StatusBadge status={record.appointment_status || "COMPLETED"} />
+          {record.amended_at && <Stamp status="AMENDED" label="Amended" />}
+        </div>
+      </div>
+      <div className={styles.recordGrid}>
+        <RecordBlock label="Chief complaint" value={record.chief_complaint} />
+        <RecordBlock label="Physical exam" value={record.physical_exam} />
+      </div>
+      <div className={styles.treatmentGrid}>
+        <RecordBlock label="Treatment" value={record.treatment_plan} />
+        <RecordBlock label="Prescription" value={record.prescriptions || record.prescription} />
+        <RecordBlock label="Requested procedures" value={record.lab_requests} />
+      </div>
+      <div className={styles.recordGrid}>
+        <RecordBlock label="Follow-up" value={record.follow_up_date_text || record.follow_up_date} formatter={formatDate} />
+        <RecordBlock label="Doctor notes" value={record.doctor_notes} />
+      </div>
+    </article>
   );
 }

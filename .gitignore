@@ -1,6 +1,7 @@
 /node_modules
 /build
 /dist
+/QELCare-APK/
 /android/.gradle
 /android/app/build
 # iOS native project is generated fresh by GitHub Actions (npx cap add ios) on a

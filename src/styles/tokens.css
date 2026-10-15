@@ -1,0 +1,61 @@
+/* Folio, with life: the canonical values for the web platform. */
+:root {
+  --paper: #EEE8DC;
+  --surface: #FFFEFA;
+  --raised: #FFFFFF;
+  --surface-hover: var(--pine-50);
+  --ink: #1B2B2A;
+  --ink-deep: #101A19;
+  /* Lobby display: one amber accent and high-contrast tonal ink surfaces. */
+  --lobby-amber: #F2B65A;
+  --lobby-surface: #1B2B2A;
+  --lobby-rule: #4A5B59;
+  --lobby-muted: #C7D1CB;
+  --ink-2: #4A5B59;
+  /* AA body text on paper and every light accent wash, including pine-100. */
+  --ink-3: #586762;
+  --rule: #E2DCCD;
+
+  --pine-950: #08302C;
+  --pine-800: #0B3B36;
+  --pine-600: #14665D;
+  --pine-300: #8FB9AE;
+  --pine-100: #D9E8E3;
+  --pine-50: #EDF4F1;
+  --pine: var(--pine-800);
+  --pine-ink: var(--surface);
+  --pine-wash: var(--pine-50);
+  --brass: #B9803A;
+  --brass-wash: #F5E8D2;
+  /* Use brass for accents and brass-ink when the accent carries body text. */
+  --brass-ink: #82551F;
+  /* Exception and success text meet AA on every light accent wash. */
+  --signal: #B63C1D;
+  --signal-wash: #FBEAE3;
+  --ok: #2A704F;
+  /* Success text stays on a light surface for AA contrast. */
+  --ok-wash: var(--surface);
+
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-ui: "Inter", "Segoe UI", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+
+  --radius-control: 6px;
+  --radius-panel: 10px;
+  --shadow-card: 0 1px 2px rgba(11, 59, 54, .06), 0 12px 32px -12px rgba(11, 59, 54, .12);
+  --shadow-raised: var(--shadow-card);
+  --shadow-pop: 0 2px 4px rgba(11, 59, 54, .06), 0 16px 40px -12px rgba(11, 59, 54, .18);
+
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --dur-1: 140ms;
+  --dur-2: 240ms;
+  --dur-3: 420ms;
+
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+}

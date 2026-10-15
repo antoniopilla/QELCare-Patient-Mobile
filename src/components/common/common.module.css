@@ -1,0 +1,212 @@
+/* Shared popups and table footers use the Clinical Folio tokens. */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: color-mix(in srgb, var(--ink-deep) 58%, transparent);
+  display: grid;
+  place-items: center;
+  padding: var(--space-16);
+  animation: backdropEnter var(--dur-2) var(--ease-out);
+}
+
+.modal {
+  box-sizing: border-box;
+  min-width: 0;
+  max-height: 90vh;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-pop);
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  animation: dialogEnter var(--dur-2) var(--ease-out);
+}
+
+.modalHeader {
+  padding: var(--space-16) var(--space-24);
+  border-top: 2px solid var(--modal-accent, var(--pine));
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-12);
+}
+
+.modalHeading { min-width: 0; }
+.modalTitle {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.modalSubtitle {
+  margin-top: var(--space-4);
+  color: var(--ink-2);
+  font-size: .8125rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.modalClose {
+  width: var(--space-32);
+  height: var(--space-32);
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.modalClose:hover { background: var(--paper); color: var(--pine); }
+.modalBody { min-height: 0; padding: var(--space-24); overflow-y: auto; }
+.confirmContent { display: grid; gap: var(--space-24); }
+.confirmMessage { color: var(--ink-2); font-size: .875rem; line-height: 1.6; white-space: pre-line; }
+.modalActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-8);
+  border-top: 1px solid var(--rule);
+  padding-top: var(--space-16);
+}
+.reasonForm { display: grid; gap: var(--space-16); }
+.reasonLabel { display: grid; gap: var(--space-8); color: var(--ink-2); font-size: .8125rem; font-weight: 600; }
+.reasonCount {
+  justify-self: end;
+  margin-top: calc(-1 * var(--space-8));
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pagination {
+  padding: var(--space-16);
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-12);
+  flex-wrap: wrap;
+  color: var(--ink-2);
+  font-family: var(--font-ui);
+}
+.paginationRange, .paginationPage { font-family: var(--font-mono); font-size: .75rem; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.paginationControls { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-8); }
+.paginationPage { color: var(--ink-3); }
+
+.selectTrigger {
+  height: calc(var(--space-32) + var(--space-8));
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--ink-3);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-12);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: .8125rem;
+  font-family: var(--font-ui);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  text-align: left;
+  cursor: pointer;
+}
+.selectTrigger:disabled { background: var(--paper); color: var(--ink-3); border-color: var(--rule); cursor: not-allowed; }
+.selectValue, .selectPlaceholder { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selectValue { color: var(--ink); }
+.selectPlaceholder { color: var(--ink-3); }
+.selectChevron { flex-shrink: 0; color: var(--ink-3); }
+.selectPanel {
+  box-sizing: border-box;
+  position: fixed;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+  animation: popoverEnter var(--dur-1) var(--ease-out);
+}
+.selectSearch { padding: var(--space-12); border-bottom: 1px solid var(--rule); position: relative; flex-shrink: 0; }
+.selectSearchIcon {
+  position: absolute;
+  left: var(--space-24);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--ink-3);
+}
+.selectSearchInput {
+  width: 100%;
+  height: calc(var(--space-32) + var(--space-8));
+  box-sizing: border-box;
+  border: 1px solid var(--ink-3);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-12) 0 calc(var(--space-32) + var(--space-4));
+  background: var(--paper);
+  color: var(--ink);
+  font-size: .8125rem;
+  font-family: inherit;
+}
+.selectSearchInput::placeholder { color: var(--ink-3); opacity: 1; }
+.selectList { min-height: 0; overflow-y: auto; padding: var(--space-4) 0; }
+.selectOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: var(--space-8) var(--space-16);
+  cursor: pointer;
+  background: transparent;
+}
+.selectOption[data-active="true"] { background: var(--pine-wash); }
+.selectOptionCopy { min-width: 0; }
+.selectOptionLabel, .selectOptionEmphasis {
+  color: var(--ink);
+  font-size: .8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.selectOptionEmphasis { font-weight: 600; }
+.selectOptionDetail { color: var(--ink-3); font-size: .75rem; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selectCheck { flex-shrink: 0; color: var(--pine); }
+.selectEmpty { padding: var(--space-16); font-size: .8125rem; color: var(--ink-2); line-height: 1.5; }
+.selectTruncated { padding: var(--space-8) var(--space-16); font-size: .75rem; line-height: 1.5; color: var(--ink-3); border-top: 1px solid var(--rule); margin-top: var(--space-4); }
+
+@keyframes backdropEnter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dialogEnter { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes popoverEnter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 640px) {
+  .modalHeader { padding: var(--space-16); }
+  .modalBody { padding: var(--space-16); }
+  .pagination { align-items: flex-start; }
+  .paginationControls { width: 100%; }
+  .paginationPage { flex: 1 1 auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalOverlay, .modal, .selectPanel { animation: none; }
+}
+
+/* Native phone presentation of the same website dialog content and actions. */
+@media (max-width: 640px) {
+  .modalOverlay { align-items: flex-end; padding: max(12px, env(safe-area-inset-top)) 0 0; }
+  .modal { width: 100% !important; max-height: calc(100dvh - max(24px, env(safe-area-inset-top))); border-radius: 16px 16px 0 0; padding-bottom: env(safe-area-inset-bottom); }
+  .modalBody { overscroll-behavior: contain; }
+  .modalActions > button { min-height: 44px; }
+}

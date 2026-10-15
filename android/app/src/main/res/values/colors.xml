@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Website src/styles/tokens.css. -->
+    <color name="qelcare_pine">#0B3B36</color>
+    <color name="qelcare_pine_dark">#08302C</color>
+    <color name="qelcare_paper">#EEE8DC</color>
+    <color name="qelcare_surface">#FFFEFA</color>
+</resources>

@@ -1,0 +1,82 @@
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-16); min-width: 0; color: var(--ink); }
+.panelBody { padding:var(--space-24); }
+.headingRow { display: flex; justify-content: space-between; gap: var(--space-12); align-items: center; flex-wrap: wrap; }
+.sectionTitle { font: 500 28px/1.2 var(--font-display); color: var(--ink); }
+.help { color: var(--ink-3); font-size: 13px; margin-top: 3px; }
+.notice { padding:var(--space-12) var(--space-16); border:1px solid var(--rule); border-left:3px solid var(--pine-600); border-radius:var(--radius-control); background:var(--pine-wash); color:var(--pine); font-size:13px; font-weight:600; line-height:1.6; overflow-wrap:anywhere; animation:noticeEnter var(--dur-2) var(--ease-out); }
+.documentsGrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--space-24); align-items: start; min-width: 0; }
+.listPanel { padding:var(--space-24); }
+.spacer { height: var(--space-12); }
+.ruledList { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; min-width: 0; }
+.documentRow { position:relative; display:flex; align-items:flex-start; flex-wrap:wrap; gap:var(--space-8); margin-bottom:var(--space-12); border:1px solid var(--rule); border-radius:var(--radius-control); background:var(--paper); box-shadow:var(--shadow-card); transition:background-color var(--dur-1) var(--ease-out),border-color var(--dur-1) var(--ease-out); }
+.documentRow:hover { background:var(--pine-50); border-color:var(--pine-300); }
+.selectedDocument, .selectedDocument:hover { background:var(--pine-wash); border-color:var(--pine-600); }
+.selectedDocument::before { content:""; position:absolute; top:var(--space-12); bottom:var(--space-12); left:0; width:3px; border-radius:0 2px 2px 0; background:var(--brass); }
+.documentButton { flex:1; min-width:0; text-align:left; border:none; background:transparent; border-radius:var(--radius-control); padding:var(--space-16); cursor:pointer; font-family:var(--font-ui); transition:transform var(--dur-1) var(--ease-out); }
+.documentButton:hover { transform:translateY(-1px); }
+.documentButton:active { transform:scale(.98); }
+.entryTitle { font-size: 15px; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.smallNote { color: var(--ink-3); font-size: 12px; margin-top: var(--space-4); }
+.detail { color: var(--ink-2); font-size: 12px; margin-top: var(--space-4); }
+.documentDelete { margin:var(--space-12) var(--space-12) var(--space-12) 0; flex-shrink:0; }
+.documentForm { min-width:0; border-radius:var(--radius-control); scroll-margin-top:calc(var(--shell-topbar-height,56px) + var(--space-24)); transition:outline-color var(--dur-1) var(--ease-out); }
+.formFlash { outline: 2px solid var(--pine); outline-offset: var(--space-4); }
+.formHeader { display: flex; justify-content: space-between; align-items: center; gap: var(--space-12); flex-wrap: wrap; margin-bottom: var(--space-16); }
+.reading { color: var(--pine); font-weight: 600; font-size: 13px; }
+.formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-12); }
+.finePrint { font-size: 11px; color: var(--ink-3); margin-top: var(--space-4); }
+.fieldStack { display: grid; gap: var(--space-12); margin-top: var(--space-12); }
+.attachment { margin-top: var(--space-12); padding: var(--space-12); border: 1px solid var(--rule); border-radius: var(--radius-control); background: var(--paper); }
+.attachmentLink { color: var(--pine); font-weight: 600; }
+.actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--space-12); margin-top: var(--space-16); }
+.alignRight { padding:var(--space-12) var(--space-16); border:1px solid var(--rule); border-radius:var(--radius-control); background:var(--brass-wash); text-align:right; }
+.adherence { font: 500 36px/1 var(--font-display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.eyebrow { color: var(--ink-3); font-size: 11px; font-weight: 600; }
+.medicationsGrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: var(--space-24); align-items: start; min-width: 0; }
+.subheading { font: 500 24px/1.2 var(--font-display); color: var(--ink); margin-bottom: var(--space-12); }
+.smallSpacer { height: var(--space-12); }
+.parsedList { margin-top: var(--space-16); display: grid; gap: var(--space-12); }
+.parsedCard { border:1px solid var(--rule); border-radius:var(--radius-control); padding:var(--space-16); display:grid; gap:var(--space-8); background:var(--paper); box-shadow:var(--shadow-card); }
+.compactGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); }
+.timeGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); }
+.checkboxLabel { display: flex; align-items: center; gap: var(--space-8); font-size: 13px; color: var(--ink-2); font-weight: 600; }
+.plainActions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--space-12); }
+.scheduleHeader { display: flex; justify-content: space-between; align-items: center; gap: var(--space-12); flex-wrap: wrap; margin-bottom: var(--space-12); }
+.doseList { display: grid; gap: var(--space-8); }
+.doseRow { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-12); border:1px solid var(--rule); border-left:3px solid var(--pine-300); border-radius:var(--radius-control); padding:var(--space-16); background:var(--paper); }
+.shrink { min-width: 0; }
+.doseTitle { font-size: 14px; font-weight: 600; color: var(--ink); }
+.doseDetail { color: var(--ink-3); font-size: 12px; }
+.doseActions { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+.medicationRow { margin-bottom:var(--space-12); border:1px solid var(--rule); border-radius:var(--radius-control); padding:var(--space-16); background:var(--paper); box-shadow:var(--shadow-card); }
+.medicationHeading { display: flex; justify-content: space-between; gap: var(--space-12); flex-wrap: wrap; }
+.medicineTitle { font-size: 15px; font-weight: 600; color: var(--ink); }
+.doseUnit { color: var(--ink-3); font-weight: 600; }
+.medicationSchedule { color: var(--ink-3); font-size: 12px; margin-top: 3px; }
+.medicationStatus { margin-top: var(--space-8); display: flex; gap: var(--space-8); flex-wrap: wrap; align-items: center; }
+.source { font-size: 11px; color: var(--ink-3); }
+.rejectionReason { color: var(--signal); font-size: 12px; margin-top: var(--space-4); }
+.medicationActions { display: flex; gap: var(--space-8); flex-wrap: wrap; align-items: flex-start; }
+.tab { min-height:48px; padding:var(--space-12) var(--space-16); border:none; border-bottom:3px solid transparent; cursor:pointer; font-family:var(--font-ui); font-size:14px; font-weight:600; background:transparent; color:var(--ink-2); transition:background-color var(--dur-1) var(--ease-out),color var(--dur-1) var(--ease-out),border-color var(--dur-1) var(--ease-out); }
+.tab:hover { background:var(--pine-50); color:var(--pine); }
+.activeTab { color:var(--pine); border-bottom-color:var(--brass); }
+.hub { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-16); min-width: 0; }
+.hubPanel { padding: 0; overflow: hidden; }
+.hubHeading { padding:var(--space-24) var(--space-24) 0; }
+.hubTitle { font: 500 32px/1.2 var(--font-display); color: var(--ink); }
+.tabs { display: flex; gap: var(--space-4); padding: var(--space-12) var(--space-12) 0; border-bottom: 1px solid var(--rule); }
+.control, .dateControl, .textarea { box-sizing:border-box; width:100%; min-width:0; max-width:100%; padding:var(--space-8) var(--space-12); border:1px solid var(--ink-3); border-radius:var(--radius-control); background:var(--raised); color:var(--ink); font:400 14px/1.5 var(--font-ui); transition:border-color var(--dur-1) var(--ease-out),background-color var(--dur-1) var(--ease-out); }
+.control, .dateControl { min-height: 40px; }
+.textarea { resize: vertical; }
+.dateControl { width: auto; max-width: 100%; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.panelBody, .listPanel, .formGrid > * { min-width: 0; }
+.help, .detail, .smallNote, .finePrint, .doseDetail, .medicineTitle, .medicationSchedule, .rejectionReason { line-height: 1.6; overflow-wrap: anywhere; }
+.entryTitle { white-space: normal; overflow-wrap: anywhere; }
+.doseList { gap:var(--space-12); }
+.control[type="time"], .control[type="date"] { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.control[type="file"] { overflow: hidden; font-size: 12px; }
+.checkboxLabel input { accent-color: var(--pine); }
+@media (max-width: 1200px) { .documentsGrid, .medicationsGrid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .formGrid,.compactGrid,.timeGrid { grid-template-columns:minmax(0,1fr); } .documentsGrid,.medicationsGrid { gap:var(--space-16); } .documentButton { padding:var(--space-12); } .documentDelete { margin:var(--space-12); } .sectionTitle { font-size:26px; } .panelBody,.listPanel { padding:var(--space-16); } .hubHeading { padding:var(--space-16) var(--space-16) 0; } .control,.dateControl,.textarea { font-size:16px; } .tab { flex:1; min-width:0; padding-inline:var(--space-12); } }
+@keyframes noticeEnter { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce) { .documentForm,.documentRow,.documentButton,.tab,.control,.dateControl,.textarea { transition:none; } .documentButton:is(:hover,:active) { transform:none; } .notice { animation:none; } }

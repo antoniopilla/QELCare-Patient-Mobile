@@ -1,0 +1,108 @@
+/* Shared typography and interaction foundations. Layout stays with each page. */
+body {
+  margin: 0;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* The surface halo makes the pine ring readable against dark controls, too.
+   Important is limited to focus so legacy inline outline:none cannot hide it. */
+:focus-visible {
+  outline: 2px solid var(--pine) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 5px var(--surface) !important;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--ink-3);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--radius-control);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-2);
+}
+
+/* Larger handles belong to content, never the sidebar or nested menus. */
+main,
+.qc-main,
+.qc-scroll-main {
+  scrollbar-width: auto;
+  scrollbar-color: var(--ink-3) var(--paper);
+}
+
+main::-webkit-scrollbar,
+.qc-main::-webkit-scrollbar,
+.qc-scroll-main::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+main::-webkit-scrollbar-track,
+.qc-main::-webkit-scrollbar-track,
+.qc-scroll-main::-webkit-scrollbar-track {
+  background: var(--paper);
+}
+
+main::-webkit-scrollbar-thumb,
+.qc-main::-webkit-scrollbar-thumb,
+.qc-scroll-main::-webkit-scrollbar-thumb {
+  border: 2px solid var(--paper);
+}
+
+::selection {
+  background: var(--pine);
+  color: var(--pine-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

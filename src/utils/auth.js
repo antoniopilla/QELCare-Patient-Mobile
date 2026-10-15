@@ -147,6 +147,7 @@ export const getUserFromToken = () => {
 // answers 401 for a business reason surfaces the error instead of logging the user
 // out. (The password-change form uses this so a wrong "current password" never kicks
 // the patient back to the login screen.)
+/** @param {string} url @param {Omit<RequestInit, 'headers'> & {headers?: Record<string, string>, noAuthRedirect?: boolean}} options */
 export const authFetch = async (url, options = {}) => {
   const { noAuthRedirect = false, ...fetchOptions } = options;
   const token = getToken();

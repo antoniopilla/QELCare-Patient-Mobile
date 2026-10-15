@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- QELCare Portal's outlined Plus mark, from the website AuthFolio. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M36,27H72Q81,27 81,36V72Q81,81 72,81H36Q27,81 27,72V36Q27,27 36,27Z"
+        android:strokeColor="#73FFFEFA"
+        android:strokeWidth="1.42" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M54,46.5V61.5M46.5,54H61.5"
+        android:strokeColor="#FFFEFA"
+        android:strokeWidth="2.84"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

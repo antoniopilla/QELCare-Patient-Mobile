@@ -1,0 +1,60 @@
+
+.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-24); min-width: 0; }
+.success { padding:var(--space-12) var(--space-16); border:1px solid var(--rule); border-left:3px solid var(--pine); border-radius:var(--radius-control); color:var(--pine); background:var(--pine-50); font-size:.875rem; line-height:1.6; overflow-wrap:anywhere; animation:noticeEnter var(--dur-2) var(--ease-out); }
+.formPanel { padding: var(--space-24); min-width: 0; }
+.formHeader, .recordHeader { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--space-16); min-width: 0; }
+.formHeader > :first-child { flex: 1 1 260px; min-width: 0; }
+.formTitle, .recordsTitle { color: var(--ink); font-family: var(--font-display); font-size: 1.75rem; font-weight: 500; line-height: 1.2; overflow-wrap: anywhere; }
+.meta { margin-top: var(--space-4); color: var(--ink-3); font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; }
+.savedNotice, .visitNotice { display:grid; gap:var(--space-8); padding:var(--space-16); border:1px solid var(--rule); border-left:3px solid var(--pine-300); border-radius:var(--radius-control); background:var(--paper); color:var(--ink-2); font-size:.8125rem; line-height:1.6; overflow-wrap:anywhere; }
+.savedNotice { margin-top: var(--space-16); }
+.strong { color: var(--ink); }
+.form { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-24); margin-top: var(--space-24); }
+.visitGrid { display: grid; grid-template-columns: minmax(0, 1fr) 170px; gap: var(--space-16); align-items: end; }
+.editingGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-16); }
+.editingGrid > :first-child { max-width: 200px; }
+.formGrid, .recordGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-16); }
+.formGrid > *, .followUpGrid > *, .editingGrid > *, .visitGrid > * { min-width: 0; }
+.control, .textareaShort, .textarea, .textareaTall { width:100%; min-width:0; max-width:100%; min-height:42px; padding:var(--space-8) var(--space-12); border:1px solid var(--ink-3); border-radius:var(--radius-control); background:var(--raised); color:var(--ink); font-family:var(--font-ui); font-size:.875rem; line-height:1.6; box-sizing:border-box; transition:border-color var(--dur-1) var(--ease-out),background-color var(--dur-1) var(--ease-out); }
+.textareaShort, .textarea, .textareaTall { min-height: 112px; resize: vertical; }
+.textareaTall { min-height: 128px; }
+.control[type="date"] { font-family: var(--font-mono); }
+.control:disabled, .textarea:disabled { opacity: .7; background: var(--paper); }
+.amendmentSection { grid-column: 1 / -1; display: grid; gap: var(--space-16); }
+.amendmentNotice { padding: var(--space-12) var(--space-16); border-left: 3px solid var(--ink-2); background: var(--paper); color: var(--ink-2); font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; }
+.tests { display: flex; flex-wrap: wrap; gap: var(--space-8); margin-bottom: var(--space-12); }
+.testButton { padding:6px 10px; border:1px solid var(--ink-3); border-radius:var(--radius-control); background:var(--surface); color:var(--pine); font-family:var(--font-ui); font-size:.75rem; font-weight:500; line-height:1.6; cursor:pointer; transition:background-color var(--dur-1) var(--ease-out),transform var(--dur-1) var(--ease-out),box-shadow var(--dur-1) var(--ease-out); }
+.testButton:hover { background:var(--pine-wash); transform:translateY(-1px); box-shadow:var(--shadow-card); }
+.testButton:active { transform:scale(.98); box-shadow:none; }
+.followUpGrid { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: var(--space-16); }
+.actions, .recordActions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-8); }
+.recordsPanel { overflow: hidden; min-width: 0; }
+.recordsHeader { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-12); padding:var(--space-24); border-bottom:1px solid var(--rule); }
+.recordCount { padding:6px 10px; border-radius:var(--radius-control); background:var(--brass-wash); color:var(--brass-ink); font:11px/1.5 var(--font-mono); font-variant-numeric:tabular-nums; }
+.records { display:grid; grid-template-columns:minmax(0,1fr); gap:var(--space-16); padding:var(--space-16); background:var(--paper); }
+.recordCard { display:grid; grid-template-columns:minmax(0,1fr); gap:var(--space-16); padding:var(--space-24); border:1px solid var(--rule); border-radius:var(--radius-panel); min-width:0; background:var(--surface); box-shadow:var(--shadow-card); }
+.recordHeader > :first-child { flex: 1 1 220px; min-width: 0; }
+.recordRef { display:inline-block; padding:4px 8px; border:1px solid var(--rule); border-radius:var(--radius-control); background:var(--pine-50); color:var(--pine); font-family:var(--font-mono); font-size:.6875rem; font-variant-numeric:tabular-nums; }
+.recordTitle { margin-top: var(--space-8); color: var(--ink); font-family: var(--font-display); font-size: 1.5rem; font-weight: 500; line-height: 1.2; overflow-wrap: anywhere; }
+.amendmentDetail { margin-top: var(--space-8); color: var(--ink-2); font-size: .75rem; line-height: 1.6; overflow-wrap: anywhere; }
+.treatmentGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-16); }
+.recordBlock { min-width:0; padding:var(--space-12) var(--space-16); border:1px solid var(--rule); border-radius:var(--radius-control); background:var(--paper); }
+.blockLabel { color: var(--ink-3); font-size: .6875rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.blockValue { margin-top: var(--space-8); color: var(--ink); font-size: .875rem; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 1100px) { .treatmentGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .page, .form { gap: var(--space-16); }
+  .formPanel, .recordsHeader, .recordCard { padding: var(--space-16); }
+  .editingGrid, .visitGrid, .formGrid, .followUpGrid, .recordGrid, .treatmentGrid { grid-template-columns: minmax(0, 1fr); gap: var(--space-16); }
+  .formTitle, .recordsTitle { font-size: 1.5rem; }
+  .formHeader { gap: var(--space-12); }
+  .records { padding:var(--space-12); gap:var(--space-12); }
+  .recordBlock { padding:var(--space-12); }
+  .control, .textareaShort, .textarea, .textareaTall { font-size:16px; }
+}
+@keyframes noticeEnter { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@media(prefers-reduced-motion:reduce) { .success { animation:none; } .testButton,.control,.textareaShort,.textarea,.textareaTall { transition:none; } .testButton:is(:hover,:active) { transform:none; } }
+
+/* Existing mobile doctor-entry fields retain their data and validation. */
+.legacyVisitGrid { display:grid; grid-template-columns:minmax(0,2fr) 120px 120px; gap:var(--space-12); }
+@media(max-width:640px) { .legacyVisitGrid { grid-template-columns:minmax(0,1fr); } }

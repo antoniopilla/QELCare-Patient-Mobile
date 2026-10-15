@@ -1,3 +1,4 @@
+import { authClasses, AuthRules, AuthIllustration } from "../Auth/AuthFolio";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../../utils/auth";
@@ -86,182 +87,7 @@ const formatName = (value) => liveName(
 );
 
 // --- Styles -------------------------------------------------------------------
-const styles = `
-  :root {
-    --navy: #0e2340; --navy-2: #163a6b; --navy-3: #1e4d8c;
-    --blue: #2d6be4; --teal: #0e8a7a; --success: #059669;
-    --ink: #111827; --ink-2: #374151; --muted: #6b7280; --line: #e5eaf3;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body, #root { height: 100%; overflow: hidden; }
-  body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #eef2fb 0%, #f4f7fc 60%, #eaf0f9 100%); }
-  button, input, select { font: inherit; outline: none; border: none; }
 
-  /* Restore a clear keyboard focus ring for buttons, links, and checkboxes
-     (text inputs keep their own :focus ring below). */
-  a:focus-visible,
-  button:focus-visible,
-  input[type="checkbox"]:focus-visible {
-    outline: 3px solid var(--blue);
-    outline-offset: 2px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { transition-duration: .001ms !important; animation-duration: .001ms !important; }
-    .rg-btn-main:hover:not(:disabled), .rg-home-btn:hover, .rg-back:hover { transform: none; }
-  }
-
-  .rg-page { height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-  .rg-shell {
-    width: 100%; max-width: 1100px;
-    height: calc(100vh - 40px); max-height: 800px;
-    display: grid; grid-template-columns: 1.1fr 0.9fr;
-    border-radius: 24px; overflow: hidden;
-    box-shadow: 0 24px 64px rgba(14,35,64,.18), 0 2px 6px rgba(14,35,64,.08);
-    border: 1px solid rgba(255,255,255,.7);
-  }
-
-  /* Brand */
-  .rg-brand {
-    position: relative; display: flex; flex-direction: column;
-    justify-content: space-between; padding: 36px 42px;
-    color: #fff; background: linear-gradient(148deg, #0e2340 0%, #1e4d8c 100%); overflow: hidden;
-  }
-  .rg-brand::before { content:""; position:absolute; width:480px; height:480px; top:-180px; right:-140px; border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 68%); pointer-events:none; }
-  .rg-brand::after  { content:""; position:absolute; width:300px; height:300px; left:-90px; bottom:-100px; border-radius:50%; background:radial-gradient(circle,rgba(45,107,228,.26) 0%,transparent 70%); pointer-events:none; }
-  .rg-grid-bg { position:absolute; inset:0; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px); background-size:36px 36px; }
-  .rg-brand-top, .rg-brand-body, .rg-brand-foot { position: relative; z-index: 1; }
-
-  /* Brand top row: logo + home button */
-  .rg-brand-top { display: flex; align-items: center; justify-content: space-between; }
-  .rg-logo { display:inline-flex; align-items:center; gap:11px; font-size:.9rem; font-weight:700; }
-  .rg-logo-mark { width:40px; height:40px; display:grid; place-items:center; border-radius:12px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.2); }
-  .rg-logo-mark svg { width:18px; height:18px; }
-
-  .rg-home-btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 8px 14px; border-radius: 10px;
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
-    color: rgba(255,255,255,.85); font-size: .78rem; font-weight: 700;
-    cursor: pointer; transition: background .18s, color .18s; letter-spacing: .01em;
-  }
-  .rg-home-btn svg { width: 14px; height: 14px; }
-  .rg-home-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
-
-  .rg-eyebrow { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); font-size:.7rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; margin-bottom:16px; }
-  .rg-eyebrow-dot { width:7px; height:7px; border-radius:50%; background:#5eead4; box-shadow:0 0 0 4px rgba(94,234,212,.18); }
-
-  .rg-brand h1 { font-size:clamp(1.9rem,2.8vw,2.9rem); line-height:1.1; letter-spacing:-.03em; font-weight:800; margin-bottom:12px; }
-  .rg-brand h1 em { font-style:normal; color:rgba(255,255,255,.72); }
-  .rg-brand-desc { color:rgba(255,255,255,.65); font-size:.86rem; line-height:1.68; max-width:380px; margin-bottom:26px; }
-
-  .rg-highlights { display:grid; gap:10px; }
-  .rg-highlight { padding:14px 16px; border-radius:14px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.11); }
-  .rg-highlight strong { display:block; font-size:.81rem; font-weight:700; margin-bottom:3px; }
-  .rg-highlight span { color:rgba(255,255,255,.62); font-size:.76rem; line-height:1.48; }
-
-  .rg-brand-foot { display:flex; justify-content:space-between; align-items:center; color:rgba(255,255,255,.42); font-size:.76rem; flex-wrap:wrap; gap:8px; }
-  .rg-foot-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); font-size:.7rem; font-weight:600; }
-  .rg-foot-badge svg { width:12px; height:12px; }
-
-  /* Form */
-  .rg-form-panel { display:flex; align-items:center; justify-content:center; padding:28px 40px; background:#fff; overflow-y:auto; }
-  .rg-form-inner { width:100%; max-width:360px; padding: 4px 0; }
-
-  .rg-back { display:inline-flex; align-items:center; gap:7px; margin-bottom:14px; color:var(--navy-2); font-size:.83rem; font-weight:700; background:none; border:none; cursor:pointer; padding:0; transition:color .15s,transform .15s; }
-  .rg-back svg { width:16px; height:16px; }
-  .rg-back:hover { color:var(--blue); transform:translateX(-2px); }
-
-  .rg-form-head { margin-bottom:12px; }
-  .rg-form-head h2 { font-size:1.6rem; font-weight:800; letter-spacing:-.03em; color:var(--ink); margin-bottom:4px; }
-  .rg-form-head p { color:var(--muted); font-size:.84rem; line-height:1.6; }
-
-  /* Step bar */
-  .rg-step-bar { display:flex; gap:6px; margin-bottom:14px; }
-  .rg-step-pill { flex:1; height:4px; border-radius:999px; transition:background .3s; }
-  .rg-step-labels { display:flex; margin-bottom:12px; }
-  .rg-step-label { flex:1; font-size:.68rem; font-weight:700; text-align:center; letter-spacing:.02em; }
-
-  .rg-badge { display:inline-flex; align-items:center; gap:7px; padding:6px 12px; border-radius:999px; background:#f0fdf9; border:1px solid #bbf0de; color:var(--teal); font-size:.74rem; font-weight:700; margin-bottom:12px; }
-  .rg-badge-dot { width:7px; height:7px; border-radius:50%; background:var(--teal); box-shadow:0 0 0 3px rgba(14,138,122,.15); }
-
-  /* Alerts */
-  .rg-alert { display:flex; align-items:flex-start; gap:9px; padding:11px 13px; border-radius:11px; font-size:.83rem; font-weight:500; margin-bottom:12px; line-height:1.5; }
-  .rg-alert svg { width:16px; height:16px; flex-shrink:0; margin-top:1px; }
-  .rg-alert-error   { background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; }
-  .rg-alert-success { background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; }
-
-  /* Fields */
-  .rg-field { margin-bottom:11px; }
-  .rg-label { display:block; font-size:.78rem; font-weight:700; color:var(--ink-2); margin-bottom:5px; letter-spacing:.01em; }
-  .rg-label-opt { font-weight:400; color:#9ba8bc; font-size:.73rem; }
-  .rg-input-wrap { position: relative; }
-  .rg-input-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#b0bbc9; width:16px; height:16px; pointer-events:none; }
-  .rg-input-icon svg { width:16px; height:16px; }
-  .rg-input {
-    width:100%; height:44px; border:1.5px solid var(--line); background:#fafbfd; border-radius:11px;
-    padding:0 14px 0 40px; color:var(--ink); font-size:.88rem;
-    transition:border-color .18s,box-shadow .18s,background .18s;
-  }
-  .rg-input-no-icon { padding-left: 14px; }
-  .rg-input::placeholder { color:#c8d0dc; }
-  .rg-input:focus { border-color:var(--blue); background:#fff; box-shadow:0 0 0 3px rgba(45,107,228,.11); }
-  .rg-input-error { border-color:#fca5a5 !important; background:#fff8f8 !important; }
-  .rg-field-hint { font-size:.71rem; color:#9ba8bc; margin-top:4px; padding-left:2px; }
-  .rg-field-hint-err { color: #b91c1c; }
-  .rg-field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-
-  /* Password */
-  .rg-pw-wrap { position:relative; }
-  .rg-pw-wrap .rg-input { padding:0 46px 0 40px; }
-  .rg-eye { position:absolute; right:4px; top:3px; bottom:3px; width:42px; background:transparent; border:none; border-radius:9px; color:#9ca3af; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s,color .15s; z-index:5; padding:0; }
-  .rg-eye svg { width:17px; height:17px; display:block; pointer-events:none; }
-  .rg-eye:hover { background:#f3f5f9; color:var(--ink-2); }
-  .rg-eye:active { background:#e9edf3; }
-
-  /* PW checks */
-  .rg-pw-checks { display:flex; flex-wrap:wrap; gap:4px; margin-top:7px; }
-  .rg-pw-check { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; font-size:.69rem; font-weight:700; }
-  .rg-pw-check svg { width:11px; height:11px; }
-  .rg-pw-dot { width:6px; height:6px; border-radius:50%; background:#c4cdd9; flex-shrink:0; }
-
-  /* Confirm match indicator */
-  .rg-confirm-match { display:flex; align-items:center; gap:5px; margin-top:5px; font-size:.72rem; font-weight:700; padding-left:2px; }
-  .rg-confirm-match svg { width:13px; height:13px; }
-
-  /* Terms */
-  .rg-terms { display:flex; align-items:flex-start; gap:9px; margin-top:4px; margin-bottom:2px; cursor:pointer; }
-  .rg-terms input[type="checkbox"] { width:15px; height:15px; flex-shrink:0; margin-top:2px; accent-color:var(--blue); cursor:pointer; }
-  .rg-terms-label { font-size:.77rem; color:var(--ink-2); line-height:1.5; user-select:none; }
-  .rg-terms-link { color:var(--blue); font-weight:700; cursor:pointer; background:none; border:none; font:inherit; font-size:.77rem; padding:0; }
-  .rg-terms-link:hover { text-decoration:underline; }
-
-  /* Actions */
-  .rg-actions { display:flex; gap:8px; margin-top:14px; }
-  .rg-btn-main {
-    flex:1; height:44px; border:none; border-radius:11px;
-    background:linear-gradient(135deg,#1e4d8c 0%,#0e2340 100%);
-    color:#fff; font-weight:700; font-size:.89rem; cursor:pointer; letter-spacing:.01em;
-    box-shadow:0 4px 14px rgba(14,35,64,.22);
-    display:flex; align-items:center; justify-content:center; gap:7px;
-    transition:transform .18s,box-shadow .18s,opacity .18s;
-  }
-  .rg-btn-main svg { width:15px; height:15px; }
-  .rg-btn-main:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 8px 22px rgba(14,35,64,.28); }
-  .rg-btn-main:disabled { opacity:.65; cursor:not-allowed; }
-
-  .rg-btn-ghost {
-    height:44px; padding:0 16px; border-radius:11px;
-    border:1.5px solid var(--line); background:#fff; color:var(--ink-2);
-    font-weight:700; font-size:.89rem; cursor:pointer;
-    transition:border-color .18s,background .18s;
-  }
-  .rg-btn-ghost:hover { border-color:#93b4e8; background:#f0f5ff; }
-
-  .rg-footnote { margin-top:12px; text-align:center; color:#9ba8bc; font-size:.76rem; line-height:1.55; }
-  .rg-footnote-link { color:var(--blue); font-weight:700; border:none; background:none; cursor:pointer; font:inherit; font-size:.76rem; }
-  .rg-footnote-link:hover { text-decoration:underline; }
-`;
 
 const HIGHLIGHTS = [
   { title: "Secure registration",    desc: "Password-validated with secure encrypted storage." },
@@ -443,20 +269,20 @@ export default function RegisterScreen() {
 
   return (
     <>
-      <style>{styles}</style>
-      <div className="rg-page">
-        <div className="rg-shell">
+
+      <div className={authClasses("rg-page")}>
+        <div className={authClasses("rg-shell")}>
 
           {/* -- Brand -- */}
-          <section className="rg-brand">
-            <div className="rg-grid-bg" />
-            <div className="rg-brand-top">
-              <div className="rg-logo">
-                <div className="rg-logo-mark"><PlusIcon /></div>
+          <section className={authClasses("rg-brand")}>
+            <AuthRules />
+            <div className={authClasses("rg-brand-top")}>
+              <div className={authClasses("rg-logo")}>
+                <div className={authClasses("rg-logo-mark")}><PlusIcon /></div>
                 <span>QELCare Portal</span>
               </div>
               <button
-                className="rg-home-btn"
+                className={authClasses("rg-home-btn")}
                 onClick={() => navigate("/")}
                 title="Go to home page"
               >
@@ -464,13 +290,14 @@ export default function RegisterScreen() {
               </button>
             </div>
 
-            <div className="rg-brand-body">
-              <div className="rg-eyebrow"><span className="rg-eyebrow-dot" />New Patient Sign Up</div>
+            <div className={authClasses("rg-brand-body")}>
+              <div className={authClasses("rg-eyebrow")}><span className={authClasses("rg-eyebrow-dot")} />New Patient Sign Up</div>
               <h1>Sign up for your<br /><em>QELCare patient account.</em></h1>
-              <p className="rg-brand-desc">Sign up as a new patient to book appointments, access your records, and manage your health services online.</p>
-              <div className="rg-highlights">
+              <p className={authClasses("rg-brand-desc")}>Sign up as a new patient to book appointments, access your records, and manage your health services online.</p>
+              <AuthIllustration />
+              <div className={authClasses("rg-highlights")}>
                 {HIGHLIGHTS.map(h => (
-                  <div className="rg-highlight" key={h.title}>
+                  <div className={authClasses("rg-highlight")} key={h.title}>
                     <strong>{h.title}</strong>
                     <span>{h.desc}</span>
                   </div>
@@ -478,60 +305,56 @@ export default function RegisterScreen() {
               </div>
             </div>
 
-            <div className="rg-brand-foot">
+            <div className={authClasses("rg-brand-foot")}>
               <span>QELCare Clinic Management System</span>
-              <span className="rg-foot-badge"><ShieldIcon />Patient self-registration</span>
+              <span className={authClasses("rg-foot-badge")}><ShieldIcon />Patient self-registration</span>
             </div>
           </section>
 
           {/* -- Form -- */}
-          <section className="rg-form-panel">
-            <div className="rg-form-inner">
+          <section className={authClasses("rg-form-panel")}>
+            <div className={authClasses("rg-form-inner")}>
 
-              <button className="rg-back" onClick={() => step > 1 ? back() : navigate("/login")}>
+              <button className={authClasses("rg-back")} onClick={() => step > 1 ? back() : navigate("/login")}>
                 <ArrowLeftIcon />
                 {step > 1 ? "Previous step" : "Back to sign in"}
               </button>
 
-              <div className="rg-form-head">
+              <div className={authClasses("rg-form-head")}>
                 <h2>Sign up</h2>
                 <p>Step {step} of 3 - {STEPS[step - 1]}</p>
               </div>
 
               {/* Step progress bar */}
-              <div className="rg-step-bar">
+              <div className={authClasses("rg-step-bar")}>
                 {[1, 2, 3].map(s => (
-                  <div key={s} className="rg-step-pill" style={{
-                    background: s < step ? "#059669" : s === step ? "#1e4d8c" : "#e5eaf3"
-                  }} />
+                  <div key={s} className={authClasses(`rg-step-pill${s < step ? " rg-step-complete" : s === step ? " rg-step-current" : ""}`)} />
                 ))}
               </div>
-              <div className="rg-step-labels">
+              <div className={authClasses("rg-step-labels")}>
                 {STEPS.map((label, i) => (
-                  <span key={label} className="rg-step-label" style={{
-                    color: i + 1 < step ? "#059669" : i + 1 === step ? "#1e4d8c" : "#c4cdd9",
-                  }}>
+                  <span key={label} className={authClasses(`rg-step-label${i + 1 < step ? " rg-step-complete" : i + 1 === step ? " rg-step-current" : ""}`)}>
                     {label}
                   </span>
                 ))}
               </div>
 
-              <div className="rg-badge"><span className="rg-badge-dot" />Patient Sign Up</div>
+              <div className={authClasses("rg-badge")}><span className={authClasses("rg-badge-dot")} />Patient Sign Up</div>
 
-              {error   && <div className="rg-alert rg-alert-error" role="alert"><AlertIcon />{error}</div>}
-              {success && <div className="rg-alert rg-alert-success" role="status"><CheckIcon />{success}</div>}
+              {error   && <div className={authClasses("rg-alert rg-alert-error")} role="alert"><AlertIcon />{error}</div>}
+              {success && <div className={authClasses("rg-alert rg-alert-success")} role="status"><CheckIcon />{success}</div>}
 
               <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} noValidate>
 
                 {/* -- Step 1: Personal Info -- */}
                 {step === 1 && <>
-                  <div className="rg-field-row">
-                    <div className="rg-field">
-                      <label className="rg-label" htmlFor="rg-first-name">First Name</label>
-                      <div className="rg-input-wrap">
+                  <div className={authClasses("rg-field-row")}>
+                    <div className={authClasses("rg-field")}>
+                      <label className={authClasses("rg-label")} htmlFor="rg-first-name">First Name</label>
+                      <div className={authClasses("rg-input-wrap")}>
                         <input
                           id="rg-first-name"
-                          className="rg-input rg-input-no-icon"
+                          className={authClasses("rg-input rg-input-no-icon")}
                           name="first_name"
                           value={form.first_name}
                           onChange={handle}
@@ -542,12 +365,12 @@ export default function RegisterScreen() {
                         />
                       </div>
                     </div>
-                    <div className="rg-field">
-                      <label className="rg-label" htmlFor="rg-last-name">Last Name</label>
-                      <div className="rg-input-wrap">
+                    <div className={authClasses("rg-field")}>
+                      <label className={authClasses("rg-label")} htmlFor="rg-last-name">Last Name</label>
+                      <div className={authClasses("rg-input-wrap")}>
                         <input
                           id="rg-last-name"
-                          className="rg-input rg-input-no-icon"
+                          className={authClasses("rg-input rg-input-no-icon")}
                           name="last_name"
                           value={form.last_name}
                           onChange={handle}
@@ -560,15 +383,15 @@ export default function RegisterScreen() {
                     </div>
                   </div>
 
-                  <div className="rg-field">
-                    <label className="rg-label" htmlFor="rg-dob">
+                  <div className={authClasses("rg-field")}>
+                    <label className={authClasses("rg-label")} htmlFor="rg-dob">
                       Date of Birth
                     </label>
-                    <div className="rg-input-wrap">
-                      <span className="rg-input-icon"><CalendarIcon /></span>
+                    <div className={authClasses("rg-input-wrap")}>
+                      <span className={authClasses("rg-input-icon")}><CalendarIcon /></span>
                       <input
                         id="rg-dob"
-                        className="rg-input"
+                        className={authClasses("rg-input")}
                         type="date"
                         name="date_of_birth"
                         value={form.date_of_birth}
@@ -579,19 +402,19 @@ export default function RegisterScreen() {
                       />
                     </div>
                     {age !== null && age >= 0 && (
-                      <p className="rg-field-hint">Age: {age} year{age !== 1 ? "s" : ""} old</p>
+                      <p className={authClasses("rg-field-hint")}>Age: {age} year{age !== 1 ? "s" : ""} old</p>
                     )}
                   </div>
 
-                  <div className="rg-field">
-                    <label className="rg-label" htmlFor="rg-phone">
-                      Phone Number <span className="rg-label-opt">(optional)</span>
+                  <div className={authClasses("rg-field")}>
+                    <label className={authClasses("rg-label")} htmlFor="rg-phone">
+                      Phone Number <span className={authClasses("rg-label-opt")}>(optional)</span>
                     </label>
-                    <div className="rg-input-wrap">
-                      <span className="rg-input-icon"><PhoneIcon /></span>
+                    <div className={authClasses("rg-input-wrap")}>
+                      <span className={authClasses("rg-input-icon")}><PhoneIcon /></span>
                       <input
                         id="rg-phone"
-                        className={`rg-input${form.phone && !isValidPhone(form.phone) ? " rg-input-error" : ""}`}
+                        className={authClasses(`rg-input${form.phone && !isValidPhone(form.phone) ? " rg-input-error" : ""}`)}
                         aria-invalid={Boolean(form.phone) && !isValidPhone(form.phone)}
                         name="phone"
                         value={form.phone}
@@ -603,20 +426,20 @@ export default function RegisterScreen() {
                       />
                     </div>
                     {form.phone && !isValidPhone(form.phone) && (
-                      <p className="rg-field-hint rg-field-hint-err">Format: 09XXXXXXXXX or +639XXXXXXXXX</p>
+                      <p className={authClasses("rg-field-hint rg-field-hint-err")}>Format: 09XXXXXXXXX or +639XXXXXXXXX</p>
                     )}
                   </div>
                 </>}
 
                 {/* -- Step 2: Account Setup -- */}
                 {step === 2 && <>
-                  <div className="rg-field">
-                    <label className="rg-label" htmlFor="rg-email">Email Address</label>
-                    <div className="rg-input-wrap">
-                      <span className="rg-input-icon"><MailIcon /></span>
+                  <div className={authClasses("rg-field")}>
+                    <label className={authClasses("rg-label")} htmlFor="rg-email">Email Address</label>
+                    <div className={authClasses("rg-input-wrap")}>
+                      <span className={authClasses("rg-input-icon")}><MailIcon /></span>
                       <input
                         id="rg-email"
-                        className={`rg-input${fieldErrors.includes("email") ? " rg-input-error" : ""}`}
+                        className={authClasses(`rg-input${fieldErrors.includes("email") ? " rg-input-error" : ""}`)}
                         aria-invalid={fieldErrors.includes("email")}
                         type="email"
                         name="email"
@@ -628,16 +451,16 @@ export default function RegisterScreen() {
                         inputMode="email"
                       />
                     </div>
-                    <p className="rg-field-hint">Used for account recovery and notifications.</p>
+                    <p className={authClasses("rg-field-hint")}>Used for account recovery and notifications.</p>
                   </div>
 
-                  <div className="rg-field">
-                    <label className="rg-label" htmlFor="rg-username">Username</label>
-                    <div className="rg-input-wrap">
-                      <span className="rg-input-icon"><UserIcon /></span>
+                  <div className={authClasses("rg-field")}>
+                    <label className={authClasses("rg-label")} htmlFor="rg-username">Username</label>
+                    <div className={authClasses("rg-input-wrap")}>
+                      <span className={authClasses("rg-input-icon")}><UserIcon /></span>
                       <input
                         id="rg-username"
-                        className={`rg-input${(uHint && form.username) || fieldErrors.includes("username") ? " rg-input-error" : ""}`}
+                        className={authClasses(`rg-input${(uHint && form.username) || fieldErrors.includes("username") ? " rg-input-error" : ""}`)}
                         aria-invalid={Boolean(uHint && form.username) || fieldErrors.includes("username")}
                         name="username"
                         value={form.username}
@@ -649,27 +472,27 @@ export default function RegisterScreen() {
                       />
                     </div>
                     {form.username && (
-                      <p className={`rg-field-hint${uHint ? " rg-field-hint-err" : ""}`}>
+                      <p className={authClasses(`rg-field-hint${uHint ? " rg-field-hint-err" : ""}`)}>
                         {uHint
                           ? uHint
                           : "Looks good — 3-30 characters, letters/numbers/_ . -"}
                       </p>
                     )}
                     {!form.username && (
-                      <p className="rg-field-hint">3-30 characters. Letters, numbers, _ . - allowed. Must start with a letter.</p>
+                      <p className={authClasses("rg-field-hint")}>3-30 characters. Letters, numbers, _ . - allowed. Must start with a letter.</p>
                     )}
                   </div>
                 </>}
 
                 {/* -- Step 3: Password -- */}
                 {step === 3 && <>
-                  <div className="rg-field">
-                    <label className="rg-label" htmlFor="rg-password">Password</label>
-                    <div className="rg-pw-wrap">
-                      <span className="rg-input-icon" style={{zIndex:1}}><LockIcon /></span>
+                  <div className={authClasses("rg-field")}>
+                    <label className={authClasses("rg-label")} htmlFor="rg-password">Password</label>
+                    <div className={authClasses("rg-pw-wrap")}>
+                      <span className={authClasses("rg-input-icon icon-layer")}><LockIcon /></span>
                       <input
                         id="rg-password"
-                        className="rg-input"
+                        className={authClasses("rg-input")}
                         type={showPw ? "text" : "password"}
                         name="password"
                         value={form.password}
@@ -678,18 +501,15 @@ export default function RegisterScreen() {
                         maxLength={128}
                         autoComplete="new-password"
                       />
-                      <button type="button" className="rg-eye" onClick={() => setShowPw(v => !v)} aria-label={showPw ? "Hide password" : "Show password"}>
+                      <button type="button" className={authClasses("rg-eye")} onClick={() => setShowPw(v => !v)} aria-label={showPw ? "Hide password" : "Show password"}>
                         {showPw ? <EyeClosed /> : <EyeOpen />}
                       </button>
                     </div>
                     {form.password && (
-                      <div className="rg-pw-checks">
+                      <div className={authClasses("rg-pw-checks")}>
                         {PW_CHECKS.map(({ key, label }) => (
-                          <span key={key} className="rg-pw-check" style={{
-                            background: checks[key] ? "#eaf8f0" : "#f1f3f7",
-                            color:      checks[key] ? "#059669" : "#9ba8bc",
-                          }}>
-                            {checks[key] ? <CheckIcon /> : <span className="rg-pw-dot" />}
+                          <span key={key} className={authClasses(`rg-pw-check${checks[key] ? " rg-pw-check-met" : ""}`)}>
+                            {checks[key] ? <CheckIcon /> : <span className={authClasses("rg-pw-dot")} />}
                             {label}
                           </span>
                         ))}
@@ -697,13 +517,13 @@ export default function RegisterScreen() {
                     )}
                   </div>
 
-                  <div className="rg-field">
-                    <label className="rg-label" htmlFor="rg-confirm">Confirm Password</label>
-                    <div className="rg-pw-wrap">
-                      <span className="rg-input-icon" style={{zIndex:1}}><LockIcon /></span>
+                  <div className={authClasses("rg-field")}>
+                    <label className={authClasses("rg-label")} htmlFor="rg-confirm">Confirm Password</label>
+                    <div className={authClasses("rg-pw-wrap")}>
+                      <span className={authClasses("rg-input-icon icon-layer")}><LockIcon /></span>
                       <input
                         id="rg-confirm"
-                        className={`rg-input${confirmMismatch ? " rg-input-error" : ""}`}
+                        className={authClasses(`rg-input${confirmMismatch ? " rg-input-error" : ""}`)}
                         aria-invalid={Boolean(confirmMismatch)}
                         type={showCPw ? "text" : "password"}
                         name="confirm"
@@ -713,34 +533,34 @@ export default function RegisterScreen() {
                         maxLength={128}
                         autoComplete="new-password"
                       />
-                      <button type="button" className="rg-eye" onClick={() => setShowCPw(v => !v)} aria-label={showCPw ? "Hide confirmed password" : "Show confirmed password"}>
+                      <button type="button" className={authClasses("rg-eye")} onClick={() => setShowCPw(v => !v)} aria-label={showCPw ? "Hide confirmed password" : "Show confirmed password"}>
                         {showCPw ? <EyeClosed /> : <EyeOpen />}
                       </button>
                     </div>
                     {confirmMatch && (
-                      <div className="rg-confirm-match" style={{ color: "#059669" }}>
+                      <div className={authClasses("rg-confirm-match text-success")}>
                         <CheckIcon />Passwords match
                       </div>
                     )}
                     {confirmMismatch && (
-                      <div className="rg-confirm-match" style={{ color: "#b91c1c" }}>
+                      <div className={authClasses("rg-confirm-match text-error")}>
                         <AlertIcon />Passwords do not match
                       </div>
                     )}
                   </div>
 
                   {/* Terms of Service */}
-                  <label className="rg-terms">
+                  <label className={authClasses("rg-terms")}>
                     <input
                       type="checkbox"
                       checked={agreedToTerms}
                       onChange={e => { setAgreedToTerms(e.target.checked); setError(""); }}
                     />
-                    <span className="rg-terms-label">
+                    <span className={authClasses("rg-terms-label")}>
                       I agree to the{" "}
                       <button
                         type="button"
-                        className="rg-terms-link"
+                        className={authClasses("rg-terms-link")}
                         onClick={e => { e.preventDefault(); setLegalView("terms"); }}
                       >
                         Terms of Service
@@ -748,7 +568,7 @@ export default function RegisterScreen() {
                       {" "}and{" "}
                       <button
                         type="button"
-                        className="rg-terms-link"
+                        className={authClasses("rg-terms-link")}
                         onClick={e => { e.preventDefault(); setLegalView("privacy"); }}
                       >
                         Data Privacy Statement
@@ -758,16 +578,16 @@ export default function RegisterScreen() {
                 </>}
 
                 {/* -- Navigation -- */}
-                <div className="rg-actions">
+                <div className={authClasses("rg-actions")}>
                   {step < 3 && (
-                    <button type="button" className="rg-btn-main" onClick={next}>
+                    <button type="button" className={authClasses("rg-btn-main")} onClick={next}>
                       Continue <ArrowRightIcon />
                     </button>
                   )}
                   {step === 3 && (
                     <button
                       type="submit"
-                      className="rg-btn-main"
+                      className={authClasses("rg-btn-main")}
                       disabled={loading || !!success}
                     >
                       {loading ? "Signing up..." : success ? "Done!" : "Sign up"}
@@ -776,9 +596,9 @@ export default function RegisterScreen() {
                 </div>
               </form>
 
-              <p className="rg-footnote">
+              <p className={authClasses("rg-footnote")}>
                 Already have an account?{" "}
-                <button className="rg-footnote-link" onClick={() => navigate("/login")}>
+                <button className={authClasses("rg-footnote-link")} onClick={() => navigate("/login")}>
                   Sign in here
                 </button>
               </p>
@@ -790,48 +610,48 @@ export default function RegisterScreen() {
       </div>
 
       {legalView && (
-        <div
+        <div className={authClasses("modal-overlay")}
           onClick={() => setLegalView(null)}
-          style={{ position: "fixed", inset: 0, background: "rgba(8,18,33,.5)", display: "grid", placeItems: "center", padding: 16, zIndex: 100 }}
+
         >
-          <div
+          <div className={authClasses("modal legal-modal")}
             role="dialog"
             aria-modal="true"
             aria-labelledby="rg-legal-title"
             onClick={e => e.stopPropagation()}
-            style={{ width: "min(560px, 100%)", maxHeight: "86vh", overflowY: "auto", background: "#fff", borderRadius: 16, boxShadow: "0 24px 64px rgba(14,35,64,.28)", fontFamily: "inherit" }}
+
           >
-            <div style={{ position: "sticky", top: 0, background: "#fff", borderBottom: "1px solid #e8eef6", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-              <h3 id="rg-legal-title" style={{ margin: 0, fontSize: 18, fontWeight: 900, color: "#0e2340", display: "flex", alignItems: "center", gap: 9 }}>
-                <span style={{ width: 32, height: 32, borderRadius: 9, background: "#eef4fb", color: "#163a6b", display: "grid", placeItems: "center", flexShrink: 0 }}><ShieldIcon size={17} /></span>
+            <div className={authClasses("modal-head")} >
+              <h3 className={authClasses("modal-title")} id="rg-legal-title" >
+                <span className={authClasses("modal-mark")} ><ShieldIcon size={17} /></span>
                 {LEGAL[legalView].title}
               </h3>
-              <button
+              <button className={authClasses("modal-close")}
                 type="button"
                 onClick={() => setLegalView(null)}
                 aria-label="Close"
                 autoFocus
-                style={{ border: 0, background: "#eef4fb", color: "#163a6b", width: 34, height: 34, borderRadius: 10, cursor: "pointer", display: "grid", placeItems: "center", flexShrink: 0 }}
+
               >
                 <CloseIcon size={18} />
               </button>
             </div>
-            <div style={{ padding: "16px 20px 22px" }}>
-              <p style={{ margin: "0 0 14px", color: "#42526a", fontSize: 14, lineHeight: 1.6 }}>{LEGAL[legalView].intro}</p>
+            <div className={authClasses("modal-body")} >
+              <p className={authClasses("legal-intro")} >{LEGAL[legalView].intro}</p>
               {LEGAL[legalView].sections.map(([heading, body]) => (
-                <div key={heading} style={{ marginBottom: 14 }}>
-                  <div style={{ color: "#0e2340", fontWeight: 800, fontSize: 14, marginBottom: 4 }}>{heading}</div>
-                  <div style={{ color: "#5a6a7e", fontSize: 13.5, lineHeight: 1.6 }}>{body}</div>
+                <div className={authClasses("legal-section")} key={heading} >
+                  <div className={authClasses("legal-heading")} >{heading}</div>
+                  <div className={authClasses("modal-copy")} >{body}</div>
                 </div>
               ))}
               {/* Reading one document must not tick the combined "Terms of Service
                   and Data Privacy Statement" box — consent is given only by the
                   patient ticking that checkbox themselves. */}
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 18 }}>
-                <button
+              <div className={authClasses("modal-actions legal-actions")} >
+                <button className={authClasses("modal-primary")}
                   type="button"
                   onClick={() => setLegalView(null)}
-                  style={{ border: 0, borderRadius: 10, padding: "10px 16px", background: "#163a6b", color: "#fff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}
+
                 >
                   Close
                 </button>

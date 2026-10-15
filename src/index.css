@@ -1,54 +1,21 @@
 * { box-sizing: border-box; }
 html, body, #root { min-height: 100%; margin: 0; }
-
-/* iOS notch / Dynamic Island / home-bar support. `viewport-fit=cover` (already
-   set in index.html) makes these env() insets non-zero on iPhone; they are 0 on
-   Android/desktop, so everything below is a no-op there. The app shell
-   (MainLayout topbar/bottom-nav) and the auth screens already pad their own
-   top/bottom with these insets — this block only adds a dynamic-viewport root
-   height and exposes the insets as variables for any full-screen view. Do NOT
-   add safe-area padding to `body` here: the topbar already consumes the top
-   inset, so body padding would double it and leave a gap under the Dynamic Island. */
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
 }
+html { -webkit-text-size-adjust: 100%; }
 #root { min-height: 100dvh; }
-body {
-  margin: 0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #eef4fb;
-  color: #162235;
-}
+body { background: var(--paper); color: var(--ink); font-family: var(--font-ui); }
 button, input, select, textarea { font: inherit; }
-input, select, textarea { font-size: 16px; }
+input, select, textarea { font-size: 16px; max-width: 100%; }
+button { touch-action: manipulation; }
 a { color: inherit; }
-.patient-auth-message {
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  /* max() keeps the old 24px everywhere and only grows on notched iPhones. */
-  padding:
-    max(24px, env(safe-area-inset-top))
-    max(24px, env(safe-area-inset-right))
-    max(24px, env(safe-area-inset-bottom))
-    max(24px, env(safe-area-inset-left));
-  background: #eef4fb;
-}
-.patient-auth-card {
-  max-width: 420px;
-  padding: 26px;
-  border-radius: 20px;
-  background: #fff;
-  border: 1px solid #dfe8f4;
-  box-shadow: 0 20px 55px rgba(15, 35, 64, .12);
-  text-align: center;
-}
-.patient-auth-card h1 { margin: 0 0 8px; color: #102f57; }
-.patient-auth-card p { margin: 0 0 18px; color: #66758a; line-height: 1.55; }
-.patient-auth-card a { color: #163a6b; font-weight: 900; }
+img { max-width: 100%; height: auto; }
+.patient-auth-message { min-height: 100dvh; display: grid; place-items: center; padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); background: var(--paper); }
+.patient-auth-card { max-width: 420px; padding: 32px; border: 1px solid var(--rule); border-radius: var(--radius-panel); background: var(--surface); box-shadow: var(--shadow-card); }
+.patient-auth-card h1 { margin: 0 0 12px; color: var(--ink); font-weight: 500; font-size: 32px; }
+.patient-auth-card p { margin: 0 0 24px; color: var(--ink-2); line-height: 1.6; }
+.patient-auth-card a { color: var(--pine); font-weight: 600; }

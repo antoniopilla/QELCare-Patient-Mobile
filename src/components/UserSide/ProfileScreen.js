@@ -1,8 +1,11 @@
+import styles from "./ProfileScreen.module.css";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { authFetch, logout } from "../../utils/auth";
 import MainLayout from "../Layout/MainLayout";
 import { EmptyState, LoadingState } from "../Workflow/ClinicUi";
 import { ageFromBirthDate, CLINIC_TZ } from "../../utils/manilaDate";
+
+const profileClasses = (value) => value.split(/\s+/).filter(Boolean).map((name) => styles[name] || "").filter(Boolean).join(" ");
 
 // Same two sub-sections as the website's Profile Settings.
 const TABS = [
@@ -117,12 +120,12 @@ function changedContactFields(form, profile) {
 // New styled field wrapper (label + control) matching the redesigned web profile.
 function Field({ label, required = false, wide = false, children }) {
   return (
-    <label className={`ps-field${wide ? " ps-col-2" : ""}`}>
-      <span className="lbl">
+    <label className={profileClasses(`ps-field${wide ? " ps-col-2" : ""}`)}>
+      <span className={profileClasses("lbl")}>
         {label}
-        {required && <span className="req">*</span>}
+        {required && <span className={profileClasses("req")}>*</span>}
       </span>
-      <div className="ps-control">{children}</div>
+      <div className={profileClasses("ps-control")}>{children}</div>
     </label>
   );
 }
@@ -165,8 +168,8 @@ const TAB_ICONS = {
 
 function SectionHead({ icon, title }) {
   return (
-    <div className="ps-section-head">
-      <span className="ps-sdot">{SECTION_ICONS[icon]}</span>
+    <div className={profileClasses("ps-section-head")}>
+      <span className={profileClasses("ps-sdot")}>{SECTION_ICONS[icon]}</span>
       <h4>{title}</h4>
     </div>
   );
@@ -190,9 +193,9 @@ function formatDateTime(value) {
 // One read-only account detail on the Security tab.
 function ReadOnly({ label, value, mono = false }) {
   return (
-    <div className="ps-stat">
-      <div className="ps-stat-k">{label}</div>
-      <div className={`ps-stat-v${mono ? " mono" : ""}`}>{value || "Not recorded"}</div>
+    <div className={profileClasses("ps-stat")}>
+      <div className={profileClasses("ps-stat-k")}>{label}</div>
+      <div className={profileClasses(`ps-stat-v${mono ? " mono" : ""}`)}>{value || "Not recorded"}</div>
     </div>
   );
 }
@@ -497,16 +500,16 @@ export default function ProfileScreen() {
 
   return (
     <MainLayout pageTitle="Profile Settings" pageSubtitle="Manage your patient account details">
-      <div className="ps-page">
+      <div className={profileClasses("ps-page")}>
         {error && (
-          <div className="ps-toast error">
-            <span className="ps-toast-dot" />
+          <div className={profileClasses("ps-toast error")}>
+            <span className={profileClasses("ps-toast-dot")} />
             {error}
           </div>
         )}
         {message && (
-          <div className="ps-toast success">
-            <span className="ps-toast-dot" />
+          <div className={profileClasses("ps-toast success")}>
+            <span className={profileClasses("ps-toast-dot")} />
             {message}
           </div>
         )}
@@ -518,37 +521,44 @@ export default function ProfileScreen() {
         ) : (
           <>
             {/* Hero */}
-            <section className="ps-card ps-hero">
-              <div className="ps-hero-cover" />
-              <div className="ps-hero-body">
-                <div className="ps-id">
-                  <label className={`ps-avatar ps-avatar-edit${hasPhoto ? " has-img" : ""}`} title="Change photo">
+            <section className={profileClasses("ps-card ps-hero")}>
+              <div className={profileClasses("ps-hero-cover")} />
+              <div className={profileClasses("ps-hero-body")}>
+                <div className={profileClasses("ps-id")}>
+                  <label className={profileClasses(`ps-avatar ps-avatar-edit${hasPhoto ? " has-img" : ""}`)} title="Change photo">
                     {hasPhoto ? (
                       <img src={profile.profile_picture} alt={displayName} />
                     ) : (
                       <span>{initials(displayName)}</span>
                     )}
-                    <span className="ps-avatar-cam">{uploading ? "…" : "✎"}</span>
+                    <span className={profileClasses("ps-avatar-cam")}>
+                      {uploading ? "…" : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                          <circle cx="12" cy="13" r="4" />
+                        </svg>
+                      )}
+                    </span>
                     <input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadPicture} disabled={uploading} hidden />
                   </label>
-                  <div className="ps-idtext">
+                  <div className={profileClasses("ps-idtext")}>
                     <h2>{displayName}</h2>
-                    <div className="ps-email">{form.email || "No email recorded"}</div>
-                    <div className="ps-chips">
-                      <span className="role">Patient #{patient.id}</span>
-                      <span className={`status ${statusOk ? "ok" : "warn"}`}>{statusValue}</span>
-                      {ageLabel && <span className="extra">{ageLabel}</span>}
+                    <div className={profileClasses("ps-email")}>{form.email || "No email recorded"}</div>
+                    <div className={profileClasses("ps-chips")}>
+                      <span className={profileClasses("role")}>Patient #{patient.id}</span>
+                      <span className={profileClasses(`status ${statusOk ? "ok" : "warn"}`)}>{statusValue}</span>
+                      {ageLabel && <span className={profileClasses("extra")}>{ageLabel}</span>}
                     </div>
                   </div>
                 </div>
-                <div className="ps-tabs" role="tablist" aria-label="Profile Settings sections">
+                <div className={profileClasses("ps-tabs")} role="tablist" aria-label="Profile Settings sections">
                   {TABS.map((tab) => (
                     <button
                       key={tab.id}
                       type="button"
                       role="tab"
                       aria-selected={activeTab === tab.id}
-                      className={activeTab === tab.id ? "active" : ""}
+                      className={profileClasses(activeTab === tab.id ? "active" : "")}
                       onClick={() => switchTab(tab.id)}
                     >
                       {TAB_ICONS[tab.id]}
@@ -560,10 +570,10 @@ export default function ProfileScreen() {
             </section>
 
             {activeTab === "profile" && (
-            <section className="ps-card ps-panel">
-              <div className="ps-panel-head">
-                <div className="ps-htitle">
-                  <span className="ps-hicon">
+            <section className={profileClasses("ps-card ps-panel")}>
+              <div className={profileClasses("ps-panel-head")}>
+                <div className={profileClasses("ps-htitle")}>
+                  <span className={profileClasses("ps-hicon")}>
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
@@ -576,10 +586,10 @@ export default function ProfileScreen() {
                 </div>
               </div>
 
-              <form onSubmit={save} className="ps-body">
-                <div className="ps-section">
+              <form onSubmit={save} className={profileClasses("ps-body")}>
+                <div className={profileClasses("ps-section")}>
                   <SectionHead icon="identity" title="Identity" />
-                  <div className="ps-grid">
+                  <div className={profileClasses("ps-grid")}>
                     <Field label="First Name" required>
                       <input value={form.first_name} maxLength={FIELD_LIMITS.first_name} autoComplete="given-name" onChange={(event) => updateField("first_name", event.target.value)} />
                     </Field>
@@ -606,9 +616,9 @@ export default function ProfileScreen() {
                   </div>
                 </div>
 
-                <div className="ps-section">
+                <div className={profileClasses("ps-section")}>
                   <SectionHead icon="contact" title="Account & Contact" />
-                  <div className="ps-grid">
+                  <div className={profileClasses("ps-grid")}>
                     <Field label="Username">
                       <input value={form.username} maxLength={FIELD_LIMITS.username} autoComplete="username" onChange={(event) => updateField("username", event.target.value)} />
                     </Field>
@@ -624,9 +634,9 @@ export default function ProfileScreen() {
                   </div>
                 </div>
 
-                <div className="ps-section">
+                <div className={profileClasses("ps-section")}>
                   <SectionHead icon="address" title="Address" />
-                  <div className="ps-grid">
+                  <div className={profileClasses("ps-grid")}>
                     <Field label="Address Line" wide>
                       <input value={form.address_line} onChange={(event) => updateField("address_line", event.target.value)} />
                     </Field>
@@ -634,9 +644,9 @@ export default function ProfileScreen() {
                 </div>
 
                 {needsOtp && (
-                  <div className={`ps-otp${otpVerified ? " verified" : ""}`}>
-                    <div className="ps-otp-head">
-                      <span className="ps-otp-ic">
+                  <div className={profileClasses(`ps-otp${otpVerified ? " verified" : ""}`)}>
+                    <div className={profileClasses("ps-otp-head")}>
+                      <span className={profileClasses("ps-otp-ic")}>
                         {otpVerified ? (
                           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M20 6 9 17l-5-5" />
@@ -653,12 +663,12 @@ export default function ProfileScreen() {
                         <p>Changes to your username, email, phone, or address need a one-time code sent to your email.</p>
                       </div>
                     </div>
-                    <div className="ps-otp-row">
-                      <button type="button" className="ps-btn ghost" disabled={otpSending} onClick={sendOtp}>
+                    <div className={profileClasses("ps-otp-row")}>
+                      <button type="button" className={profileClasses("ps-btn ghost")} disabled={otpSending} onClick={sendOtp}>
                         {otpSending ? "Sending..." : otpSent ? "Resend code" : "Send code"}
                       </button>
                       <input
-                        className="ps-otp-input"
+                        className={profileClasses("ps-otp-input")}
                         inputMode="numeric"
                         maxLength={6}
                         value={otpCode}
@@ -666,18 +676,18 @@ export default function ProfileScreen() {
                         placeholder="------"
                         disabled={otpVerified}
                       />
-                      <button type="button" className="ps-btn primary" disabled={!otpSent || otpVerifying || otpVerified} onClick={verifyOtp}>
+                      <button type="button" className={profileClasses("ps-btn primary")} disabled={!otpSent || otpVerifying || otpVerified} onClick={verifyOtp}>
                         {otpVerified ? "Verified" : otpVerifying ? "Checking..." : "Verify"}
                       </button>
                     </div>
                   </div>
                 )}
 
-                <div className="ps-form-actions">
-                  <button type="submit" className="ps-btn primary" disabled={!canSave}>
+                <div className={profileClasses("ps-form-actions")}>
+                  <button type="submit" className={profileClasses("ps-btn primary")} disabled={!canSave}>
                     {saving ? "Saving..." : "Save Changes"}
                   </button>
-                  <button type="button" className="ps-btn ghost" onClick={load} disabled={saving}>
+                  <button type="button" className={profileClasses("ps-btn ghost")} onClick={load} disabled={saving}>
                     Reset
                   </button>
                 </div>
@@ -687,21 +697,21 @@ export default function ProfileScreen() {
 
             {activeTab === "security" && (
             <>
-            <section className="ps-card ps-panel">
-              <div className="ps-panel-head">
-                <div className="ps-htitle">
-                  <span className="ps-hicon">
+            <section className={profileClasses("ps-card ps-panel")}>
+              <div className={profileClasses("ps-panel-head")}>
+                <div className={profileClasses("ps-htitle")}>
+                  <span className={profileClasses("ps-hicon")}>
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                     </svg>
                   </span>
                   <div>
                     <h3>Account Status</h3>
-                    <p>Live account security fields from the backend.</p>
+                    <p>Your account access and security history.</p>
                   </div>
                 </div>
               </div>
-              <div className="ps-status-grid">
+              <div className={profileClasses("ps-status-grid")}>
                 <ReadOnly label="Username" value={profile.username} />
                 <ReadOnly label="Role" value={profile.role} />
                 <ReadOnly label="Status" value={profile.status} />
@@ -715,10 +725,10 @@ export default function ProfileScreen() {
               </div>
             </section>
 
-            <section className="ps-card ps-panel">
-              <div className="ps-panel-head">
-                <div className="ps-htitle">
-                  <span className="ps-hicon">
+            <section className={profileClasses("ps-card ps-panel")}>
+              <div className={profileClasses("ps-panel-head")}>
+                <div className={profileClasses("ps-htitle")}>
+                  <span className={profileClasses("ps-hicon")}>
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="11" width="18" height="11" rx="2" />
                       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -731,11 +741,11 @@ export default function ProfileScreen() {
                 </div>
               </div>
 
-              <div className="ps-body">
-                {pwError && <div className="ps-toast error" style={{ marginBottom: 12 }}><span className="ps-toast-dot" />{pwError}</div>}
-                {pwMsg && <div className="ps-toast success" style={{ marginBottom: 12 }}><span className="ps-toast-dot" />{pwMsg}</div>}
+              <div className={profileClasses("ps-body")}>
+                {pwError && <div className={profileClasses("ps-toast error")} style={{ marginBottom: 12 }}><span className={profileClasses("ps-toast-dot")} />{pwError}</div>}
+                {pwMsg && <div className={profileClasses("ps-toast success")} style={{ marginBottom: 12 }}><span className={profileClasses("ps-toast-dot")} />{pwMsg}</div>}
 
-                <div className="ps-grid">
+                <div className={profileClasses("ps-grid")}>
                   <Field label="Current Password">
                     <input type={showPw ? "text" : "password"} value={pw.current} autoComplete="current-password" onChange={(event) => setPw((p) => ({ ...p, current: event.target.value }))} />
                   </Field>
@@ -748,20 +758,20 @@ export default function ProfileScreen() {
                 </div>
 
                 {pw.next.length > 0 && (
-                  <div className="ps-pwrules">
+                  <div className={profileClasses("ps-pwrules")}>
                     {PW_RULES.map((rule) => {
                       const ok = passwordChecks(pw.next)[rule.key];
-                      return <span key={rule.key} className={`ps-pwrule${ok ? " ok" : ""}`}>{ok ? "✓" : "○"} {rule.label}</span>;
+                      return <span key={rule.key} className={profileClasses(`ps-pwrule${ok ? " ok" : ""}`)}>{ok ? "✓" : "○"} {rule.label}</span>;
                     })}
                   </div>
                 )}
 
-                <label className="ps-pwshow">
+                <label className={profileClasses("ps-pwshow")}>
                   <input type="checkbox" checked={showPw} onChange={(event) => setShowPw(event.target.checked)} /> Show passwords
                 </label>
 
-                <div className="ps-form-actions">
-                  <button type="button" className="ps-btn primary" onClick={changePassword} disabled={pwSaving}>
+                <div className={profileClasses("ps-form-actions")}>
+                  <button type="button" className={profileClasses("ps-btn primary")} onClick={changePassword} disabled={pwSaving}>
                     {pwSaving ? "Updating..." : "Update Password"}
                   </button>
                 </div>
@@ -773,311 +783,7 @@ export default function ProfileScreen() {
         )}
       </div>
 
-      <style>{`
-.ps-page {
-  --nv: #153a6b;
-  --nv-deep: #0f2744;
-  --teal: #1f7a6f;
-  --ink: #14243b;
-  --muted: #5c6c81;
-  --line: #e5edf6;
-  --field-line: #dbe4ef;
-  --bg-soft: #f5f8fc;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  color: var(--ink);
-}
 
-.ps-toast {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 15px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 700;
-  border: 1px solid;
-  line-height: 1.35;
-}
-.ps-toast.success { background: #effaf3; border-color: #bfe6cd; color: #137a4b; }
-.ps-toast.error { background: #fef1f1; border-color: #f6ced0; color: #b4323f; }
-.ps-toast-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: 0 0 auto; }
-
-.ps-card {
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  box-shadow: 0 1px 2px rgba(16, 40, 68, 0.04), 0 14px 34px -22px rgba(16, 40, 68, 0.28);
-}
-
-.ps-hero { overflow: hidden; position: relative; }
-.ps-hero-cover {
-  height: 96px;
-  background:
-    radial-gradient(120% 180% at 12% -30%, rgba(31, 122, 111, 0.85), transparent 55%),
-    linear-gradient(115deg, #0f2744 0%, #163a6b 52%, #1f6f76 100%);
-}
-.ps-hero-body { padding: 0 18px 18px; margin-top: -44px; }
-.ps-id { display: flex; flex-direction: column; align-items: flex-start; gap: 13px; min-width: 0; }
-.ps-avatar {
-  width: 88px;
-  height: 88px;
-  border-radius: 22px;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(140deg, #153a6b, #1f7a6f);
-  color: #fff;
-  font-weight: 800;
-  font-size: 27px;
-  letter-spacing: 0.5px;
-  border: 4px solid #fff;
-  box-shadow: 0 10px 24px -10px rgba(15, 39, 68, 0.55);
-  flex: 0 0 auto;
-}
-.ps-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.ps-idtext { padding-bottom: 2px; min-width: 0; }
-.ps-idtext h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.2px;
-  color: var(--nv-deep);
-  line-height: 1.15;
-  overflow-wrap: anywhere;
-}
-.ps-email { margin: 3px 0 9px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
-.ps-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.ps-chips span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 11.5px;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-.ps-chips .role { background: #e9eefb; color: #26417a; }
-.ps-chips .status { background: #eef3f8; color: #566579; }
-.ps-chips .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.ps-chips .status.ok { background: #e7f7ee; color: #137a4b; }
-.ps-chips .status.ok::before { background: #25a463; }
-.ps-chips .status.warn { background: #fdf0e6; color: #a2621f; }
-.ps-chips .status.warn::before { background: #d9832b; }
-.ps-chips .extra { background: #eef3f8; color: #3d5168; }
-
-/* Profile / Security switch: the website's segmented control, full width here. */
-.ps-tabs {
-  display: flex;
-  gap: 4px;
-  padding: 5px;
-  margin-top: 16px;
-  border-radius: 13px;
-  background: #eef2f8;
-  border: 1px solid #e3eaf4;
-}
-.ps-tabs button {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  height: 40px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--muted);
-  font-family: inherit;
-  font-size: 13.5px;
-  font-weight: 700;
-  padding: 0 12px;
-  cursor: pointer;
-}
-.ps-tabs button.active { background: #fff; color: var(--nv-deep); box-shadow: 0 2px 8px -3px rgba(15, 39, 68, 0.25); }
-
-.ps-status-grid { padding: 16px 18px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-.ps-stat {
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg, #fbfdff, #f6f9fd);
-  border-radius: 13px;
-  padding: 12px 13px;
-  min-width: 0;
-}
-.ps-stat-k { font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: #8493a6; margin-bottom: 6px; }
-.ps-stat-v { font-size: 13.5px; font-weight: 700; color: var(--nv-deep); overflow-wrap: anywhere; }
-.ps-stat-v.mono { font-variant-numeric: tabular-nums; }
-
-.ps-panel { overflow: hidden; }
-.ps-panel-head {
-  padding: 18px;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.ps-htitle { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.ps-hicon {
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  background: #eaf0fb;
-  color: #26417a;
-}
-.ps-panel-head h3 { margin: 0; font-size: 16px; font-weight: 800; color: var(--nv-deep); }
-.ps-panel-head p { margin: 3px 0 0; font-size: 12px; color: var(--muted); line-height: 1.35; }
-
-.ps-btn {
-  min-height: 44px;
-  border-radius: 12px;
-  padding: 0 18px;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.ps-btn.primary {
-  border: 1px solid var(--nv);
-  background: linear-gradient(180deg, #1c4a86, #153a6b);
-  color: #fff;
-  box-shadow: 0 8px 18px -10px rgba(21, 58, 107, 0.9);
-}
-.ps-btn.ghost { border: 1px solid var(--field-line); background: #fff; color: var(--nv); }
-.ps-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-
-.ps-body { padding: 4px 18px 20px; display: flex; flex-direction: column; }
-.ps-section { padding: 18px 0; border-bottom: 1px dashed var(--line); }
-.ps-section-head { display: flex; align-items: center; gap: 9px; margin-bottom: 15px; }
-.ps-sdot {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  background: #e7f4f1;
-  color: #1f7a6f;
-  flex: 0 0 auto;
-}
-.ps-section-head h4 {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: #42566d;
-}
-
-.ps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-.ps-col-2 { grid-column: span 2; }
-
-.ps-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
-.ps-field > .lbl { font-size: 12.5px; font-weight: 700; color: #48596e; display: flex; align-items: center; gap: 5px; }
-.ps-field > .lbl .req { color: #d0433f; font-weight: 800; }
-.ps-control { position: relative; }
-.ps-field input,
-.ps-field select {
-  width: 100%;
-  height: 46px;
-  border: 1.5px solid var(--field-line);
-  border-radius: 12px;
-  background: #fff;
-  color: #16283f;
-  font-family: inherit;
-  font-size: 15px;
-  padding: 0 14px;
-  outline: none;
-  box-sizing: border-box;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-}
-.ps-field select {
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 38px;
-  cursor: pointer;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235c6c81' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 13px center;
-}
-.ps-field input::placeholder { color: #9aa8ba; }
-.ps-field input:focus,
-.ps-field select:focus { border-color: var(--nv); box-shadow: 0 0 0 4px rgba(21, 58, 107, 0.12); }
-
-.ps-otp {
-  margin-top: 18px;
-  border: 1px solid #f0d9a8;
-  background: linear-gradient(180deg, #fffaf0, #fff6e5);
-  border-radius: 14px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
-}
-.ps-otp.verified { border-color: #bfe6cd; background: linear-gradient(180deg, #f2fbf5, #eaf7ef); }
-.ps-otp-head { display: flex; gap: 11px; align-items: flex-start; }
-.ps-otp-ic {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  background: #fbead0;
-  color: #b4771a;
-}
-.ps-otp.verified .ps-otp-ic { background: #d9f0e1; color: #137a4b; }
-.ps-otp-head strong { display: block; font-size: 13.5px; font-weight: 800; color: #7a5310; }
-.ps-otp.verified .ps-otp-head strong { color: #137a4b; }
-.ps-otp-head p { margin: 3px 0 0; font-size: 12.5px; color: #6b6152; line-height: 1.4; }
-.ps-otp.verified .ps-otp-head p { color: #4f6a58; }
-.ps-otp-row { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
-.ps-otp-row .ps-btn { flex: 0 0 auto; }
-.ps-otp-input {
-  flex: 1 1 130px;
-  min-width: 0;
-  height: 44px;
-  border: 1.5px solid #e6d3a8;
-  border-radius: 11px;
-  background: #fff;
-  font-family: inherit;
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: 0.3em;
-  text-align: center;
-  color: #16283f;
-  padding: 0 10px;
-  outline: none;
-  box-sizing: border-box;
-}
-.ps-otp-input:focus { border-color: var(--nv); box-shadow: 0 0 0 4px rgba(21, 58, 107, 0.12); }
-.ps-otp.verified .ps-otp-input { border-color: #bfe6cd; }
-
-.ps-form-actions { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 18px; }
-.ps-form-actions .ps-btn { flex: 1 1 auto; min-width: 150px; }
-
-.ps-avatar-edit { position: relative; cursor: pointer; }
-.ps-avatar-cam {
-  position: absolute; right: -2px; bottom: -2px;
-  width: 26px; height: 26px; border-radius: 50%;
-  background: #163a6b; color: #fff; border: 3px solid #fff;
-  display: grid; place-items: center; font-size: 13px; font-weight: 900;
-}
-.ps-pwrules { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 2px; }
-.ps-pwrule {
-  font-size: 11px; font-weight: 800; padding: 4px 9px; border-radius: 999px;
-  background: #f1f4f8; color: #8a97a8;
-}
-.ps-pwrule.ok { background: #e7f7ee; color: #137a4b; }
-.ps-pwshow { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: #48596e; font-weight: 700; margin-top: 12px; }
-.ps-pwshow input { width: 15px; height: 15px; accent-color: #163a6b; }
-      `}</style>
     </MainLayout>
   );
 }

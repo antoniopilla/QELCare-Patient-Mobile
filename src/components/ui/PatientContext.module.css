@@ -1,0 +1,16 @@
+.context { position: sticky; top: var(--shell-topbar-height, 56px); z-index: 2; display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-16) var(--space-24); min-width: 0; padding: var(--space-16) var(--space-24); border: 1px solid var(--rule); border-left: var(--space-4) solid var(--pine); border-radius: var(--radius-control); background: var(--surface); color: var(--ink); }
+.queue { display: grid; gap: var(--space-4); min-width: var(--space-48); text-align: center; }
+.queue > span, .complaint > span { color: var(--ink-3); font: 500 11px/1.4 var(--font-ui); text-transform: uppercase; letter-spacing: .06em; }
+.queue strong { font: 500 40px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.identity { min-width: 0; flex: 1 1 200px; }
+.identity h2 { margin: 0 0 var(--space-4); font: 500 24px/1.15 var(--font-display); overflow-wrap: anywhere; }
+.metadata { display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-12); color: var(--ink-2); font: 400 12px/1.5 var(--font-ui); }
+.reference { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.detail { margin-top: var(--space-4); color: var(--ink-2); font: 400 12px/1.5 var(--font-ui); overflow-wrap: anywhere; }
+.complaint { min-width: 0; flex: 2 1 200px; }
+.complaint p { margin: var(--space-4) 0 0; font: 400 13px/1.5 var(--font-ui); white-space: pre-wrap; overflow-wrap: anywhere; }
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; }
+/* These pages grow with the document. Auto overflow on the app main would
+   capture sticky positioning without scrolling; ledgers scroll in their own wrappers. */
+:global(.qc-main):has(.context) { overflow: visible !important; }
+@media (max-width: 640px) { .context { padding: var(--space-12); gap: var(--space-12); align-items: flex-start; } .queue { min-width: var(--space-32); } .queue strong { font-size: 32px; } .identity { flex-basis: calc(100% - var(--space-48)); } .complaint { flex-basis: 100%; } .identity h2 { font-size: 22px; } }

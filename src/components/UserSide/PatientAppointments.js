@@ -8,15 +8,20 @@ import {
   Field,
   LoadingState,
   Panel,
-  StatusBadge,
   formatDate,
   formatTime,
   getRows,
-  inputStyle,
   todayISO,
 } from "../Workflow/ClinicUi";
 import Pagination, { usePagination } from "../common/Pagination";
 import UserBooking from "./UserBooking";
+import ReasonModal from "../common/ReasonModal";
+import ConfirmModal from "../common/ConfirmModal";
+import { Input, Select } from "../ui/Field";
+import { InlineAlert } from "../ui/InlineAlert";
+import Thread from "../ui/Thread";
+import PatientIdentity from "../ui/PatientIdentity";
+import styles from "./PatientAppointments.module.css";
 
 const TABS = [
   { id: "upcoming", label: "Upcoming" },
@@ -90,17 +95,8 @@ function TabButton({ active, children, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      style={{
-        minHeight: 40,
-        padding: "0 14px",
-        borderRadius: 8,
-        border: `1px solid ${active ? "#163a6b" : "#d7e2ef"}`,
-        background: active ? "#163a6b" : "#fff",
-        color: active ? "#fff" : "#163a6b",
-        cursor: "pointer",
-        fontWeight: 900,
-        fontFamily: "inherit",
-      }}
+      className={[styles.tabButton, active && styles.tabActive].filter(Boolean).join(" ")}
+      aria-pressed={active}
     >
       {children}
     </button>
@@ -121,6 +117,7 @@ export default function PatientAppointments() {
   const [busyId, setBusyId] = useState(null);
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({ date: "", time: "" });
+  const [cancelTarget, setCancelTarget] = useState(null);
 
   // `silent` = background poll: don't toggle the loading spinner and don't wipe
   // the visible list/bar on a transient error, so the live sync is seamless.
@@ -156,10 +153,16 @@ export default function PatientAppointments() {
     return () => clearInterval(id);
   }, [activeTab, load]);
 
-  async function cancelAppt(item) {
-    const reason = window.prompt(`Cancel appointment #${item.id} on ${formatDate(item.date)} at ${formatTime(item.time)}?\n\nPlease enter a reason for cancelling:`, "");
-    if (reason === null) return; // patient dismissed the prompt
+  function cancelAppt(item) {
+    setActionErr("");
+    setActionMsg("");
+    setCancelTarget(item);
+  }
+
+  async function confirmCancel(reason) {
     if (!reason.trim()) { setActionErr("A reason is required to cancel."); return; }
+    const item = cancelTarget;
+    setCancelTarget(null);
     setBusyId(item.id);
     setActionErr("");
     setActionMsg("");
@@ -236,10 +239,11 @@ export default function PatientAppointments() {
   }
 
   return (
-    <div style={{ display: "grid", gap: 14 }}>
-      <Panel style={{ padding: 12 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+    <div className={styles.page}>
+      <Panel className={styles.tabsPanel}>
+        <div className={styles.workspaceHeading}><span className={styles.eyebrow}>Patient appointments</span><span>Upcoming visits, history and bookings</span></div>
+        <div className={styles.toolbar}>
+          <div className={styles.tabs}>
             {TABS.map((tab) => (
               <TabButton key={tab.id} active={activeTab === tab.id} onClick={() => changeTab(tab.id)}>
                 {tab.label}
@@ -252,7 +256,7 @@ export default function PatientAppointments() {
 
       <ErrorState message={error} />
       {actionErr && <ErrorState message={actionErr} />}
-      {actionMsg && <div style={{ padding: "10px 12px", borderRadius: 8, background: "#edf8f1", color: "#0f6b3c", fontSize: 13, fontWeight: 800 }}>{actionMsg}</div>}
+      {actionMsg && <InlineAlert tone="success" message={actionMsg} />}
 
       {activeTab === "book" ? (
         <UserBooking onViewAppointments={() => changeTab("upcoming")} onBooked={() => { load(); changeTab("upcoming"); }} />
@@ -262,12 +266,13 @@ export default function PatientAppointments() {
         <LoadingState label="Loading appointments..." />
       ) : activeTab === "upcoming" ? (
         <>
-          {currentVisit && <VisitProgress appointment={currentVisit} />}
+          {currentVisit && <VisitContext appointment={currentVisit} />}
           <AppointmentTable
             title="Upcoming Appointments"
             rows={upcoming}
             emptyTitle="No upcoming appointments"
             emptyDetail="Book an appointment to start the clinic flow."
+            emptyAction={<ActionButton onClick={() => changeTab("book")}>Book Appointment</ActionButton>}
             actions={actions}
           />
         </>
@@ -277,29 +282,30 @@ export default function PatientAppointments() {
           rows={history}
           emptyTitle="No appointment history"
           emptyDetail="Past, completed, cancelled, and no-show appointments appear here."
+          emptyAction={<ActionButton tone="secondary" onClick={() => changeTab("upcoming")}>View Upcoming Appointments</ActionButton>}
           history
         />
       )}
 
       {editing && (
         <div
-          style={{ position: "fixed", inset: 0, background: "rgba(8,18,33,.46)", display: "grid", placeItems: "center", padding: 16, zIndex: 50 }}
+          className={styles.editOverlay}
           onClick={() => setEditing(null)}
         >
-          <div onClick={(e) => e.stopPropagation()} style={{ width: "min(440px, 94vw)" }}>
-          <Panel style={{ padding: 18 }}>
-            <div style={{ fontSize: 16, fontWeight: 900, color: "#162235", marginBottom: 4 }}>Edit Appointment #{editing.id}</div>
-            <div style={{ fontSize: 12, color: "#6b778c", marginBottom: 14 }}>Changing the schedule sets it back to pending for clinic confirmation.</div>
-            <div style={{ display: "grid", gap: 12 }}>
+          <div onClick={(e) => e.stopPropagation()} className={styles.editDialog} role="dialog" aria-modal="true" aria-labelledby="patient-edit-appointment-title">
+          <Panel className={styles.formPanel}>
+            <div className={styles.sectionTitle} id="patient-edit-appointment-title">Edit Appointment <span className={styles.reference}>#{editing.id}</span></div>
+            <div className={styles.sectionDescription}>Changing the schedule sets it back to pending for clinic confirmation.</div>
+            <div className={styles.formFields}>
               <Field label="Date">
-                <input style={inputStyle} type="date" min={todayISO()} value={editForm.date} onChange={(e) => setEditForm((f) => ({ ...f, date: e.target.value }))} />
+                <Input type="date" min={todayISO()} value={editForm.date} onChange={(e) => setEditForm((f) => ({ ...f, date: e.target.value }))} />
               </Field>
               <Field label="Time">
-                <input style={inputStyle} type="time" min={CLINIC_OPEN} max={CLINIC_CLOSE} value={editForm.time} onChange={(e) => setEditForm((f) => ({ ...f, time: e.target.value }))} />
-                <div style={{ fontSize: 11, color: "#8a97a8", marginTop: 4 }}>Clinic hours: 8:00 AM – 8:00 PM</div>
+                <Input type="time" min={CLINIC_OPEN} max={CLINIC_CLOSE} value={editForm.time} onChange={(e) => setEditForm((f) => ({ ...f, time: e.target.value }))} />
+                <div className={styles.fieldHint}>Clinic hours: 8:00 AM – 8:00 PM</div>
               </Field>
               {actionErr && <ErrorState message={actionErr} />}
-              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 4 }}>
+              <div className={styles.dialogActions}>
                 <ActionButton tone="secondary" onClick={() => setEditing(null)}>Close</ActionButton>
                 <ActionButton onClick={submitEdit} disabled={busyId === editing.id}>{busyId === editing.id ? "Saving..." : "Save Changes"}</ActionButton>
               </div>
@@ -308,68 +314,21 @@ export default function PatientAppointments() {
           </div>
         </div>
       )}
+
+      {cancelTarget && (
+        <ReasonModal
+          title="Cancel Appointment"
+          subtitle={`#${cancelTarget.id} · ${formatDate(cancelTarget.date)} at ${formatTime(cancelTarget.time)}`}
+          label="Reason for cancelling"
+          placeholder="Please tell the clinic why you are cancelling..."
+          confirmText="Cancel Appointment"
+          cancelText="Keep Appointment"
+          busy={busyId === cancelTarget.id}
+          onClose={() => setCancelTarget(null)}
+          onConfirm={confirmCancel}
+        />
+      )}
     </div>
-  );
-}
-
-const VISIT_STAGES = [
-  { key: "requested", label: "Requested" },
-  { key: "confirmed", label: "Confirmed" },
-  { key: "queue", label: "In Queue" },
-  { key: "payment", label: "Payment" },
-  { key: "completed", label: "Completed" },
-];
-
-function visitStageIndex(status) {
-  switch (status) {
-    case "PENDING": return 0;
-    case "CONFIRMED": return 1;
-    case "IN_QUEUE": return 2;
-    case "FOR_BILLING": return 3;
-    case "COMPLETED": return 4;
-    default: return -1; // cancelled / no-show: no progress to show
-  }
-}
-
-// A simple stepper showing where the patient's soonest visit is in the clinic
-// process: Requested -> Confirmed -> In Queue (check-in/vitals) -> Completed.
-function VisitProgress({ appointment }) {
-  if (!appointment) return null;
-  const idx = visitStageIndex(appointment.status);
-  if (idx < 0) return null;
-  return (
-    <Panel style={{ padding: 16 }}>
-      <div style={{ fontSize: 13, fontWeight: 900, color: "#162235", marginBottom: 2 }}>Your visit progress</div>
-      <div style={{ fontSize: 12, color: "#6b778c", marginBottom: 14 }}>
-        {appointment.doctor_name || "Doctor"}{appointment.specialty_name ? ` - ${appointment.specialty_name}` : ""} - {formatDate(appointment.date)} at {formatTime(appointment.time)}
-      </div>
-      {/* Each stage is an equal, shrinkable flex column (minWidth:0) so all five
-          stages always fit the screen width and the labels never overlap on
-          narrow phones. The progress line is drawn behind the circles, from one
-          circle's centre to the next. */}
-      <div style={{ display: "flex", alignItems: "flex-start" }}>
-        {VISIT_STAGES.map((stage, i) => {
-          const done = i < idx;
-          const current = i === idx;
-          return (
-            <div key={stage.key} style={{ position: "relative", flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-              {i < VISIT_STAGES.length - 1 && (
-                <div style={{ position: "absolute", top: 13.5, left: "50%", width: "100%", height: 3, borderRadius: 2, background: i < idx ? "#0e8a7a" : "#e3ebf5", zIndex: 0 }} />
-              )}
-              <div style={{
-                position: "relative", zIndex: 1,
-                width: 30, height: 30, borderRadius: 999,
-                background: done ? "#0e8a7a" : current ? "#163a6b" : "#eef2f6",
-                color: done || current ? "#fff" : "#94a2b6",
-                display: "grid", placeItems: "center", fontWeight: 900, fontSize: 13,
-                boxShadow: current ? "0 0 0 4px rgba(22,58,107,.15)" : "none",
-              }}>{i + 1}</div>
-              <div style={{ fontSize: 10, lineHeight: 1.2, fontWeight: 800, textAlign: "center", overflowWrap: "anywhere", color: done ? "#0e8a7a" : current ? "#163a6b" : "#94a2b6" }}>{stage.label}</div>
-            </div>
-          );
-        })}
-      </div>
-    </Panel>
   );
 }
 
@@ -381,6 +340,7 @@ function RelativesTab() {
   const [form, setForm] = useState(emptyRelative());
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [confirm, setConfirm] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -446,8 +406,11 @@ function RelativesTab() {
     setMsg("");
   };
 
-  const remove = async (r) => {
-    if (!window.confirm(`Remove ${r.first_name} ${r.last_name} from your saved relatives?`)) return;
+  const remove = (r) => {
+    setConfirm({ title: "Remove Relative", message: `Remove ${r.first_name} ${r.last_name} from your saved relatives?`, confirmText: "Remove", relative: r });
+  };
+
+  const doRemove = async (r) => {
     setError("");
     try {
       const res = await authFetch(`/relatives/${r.relative_id}`, { method: "DELETE" });
@@ -461,56 +424,56 @@ function RelativesTab() {
   };
 
   return (
-    <div style={{ display: "grid", gap: 14 }}>
-      <Panel style={{ padding: 18 }}>
-        <div style={{ fontSize: 16, fontWeight: 900, color: "#162235" }}>{editingId ? "Edit relative" : "Add a relative"}</div>
-        <div style={{ fontSize: 13, color: "#6b778c", marginTop: 3, marginBottom: 12 }}>Save the people you book for so you don't have to retype them. They appear in the "Someone else" picker when booking.</div>
+    <div className={styles.page}>
+      <Panel className={styles.formPanel}>
+        <div className={styles.sectionTitle}>{editingId ? "Edit relative" : "Add a relative"}</div>
+        <div className={styles.sectionDescription}>Save the people you book for so you don't have to retype them. They appear in the "Someone else" picker when booking.</div>
         <ErrorState message={error} />
-        {msg && <div style={{ padding: "10px 12px", borderRadius: 8, background: "#edf8f1", color: "#0f6b3c", fontSize: 13, fontWeight: 800, marginBottom: 10 }}>{msg}</div>}
-        <div style={{ display: "grid", gap: 10 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <Field label="First name"><input style={inputStyle} value={form.first_name} onChange={(e) => setField("first_name", e.target.value)} /></Field>
-            <Field label="Last name"><input style={inputStyle} value={form.last_name} onChange={(e) => setField("last_name", e.target.value)} /></Field>
+        {msg && <InlineAlert tone="success" message={msg} className={styles.relativeMessage} />}
+        <div className={styles.formFields}>
+          <div className={styles.nameGrid}>
+            <Field label="First name"><Input value={form.first_name} onChange={(e) => setField("first_name", e.target.value)} /></Field>
+            <Field label="Last name"><Input value={form.last_name} onChange={(e) => setField("last_name", e.target.value)} /></Field>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 150px 110px", gap: 10 }}>
-            <Field label="Relationship"><input style={inputStyle} value={form.relationship} onChange={(e) => setField("relationship", e.target.value)} placeholder="Parent, child, spouse" /></Field>
-            <Field label="Birth date"><input style={inputStyle} type="date" value={form.date_of_birth} onChange={(e) => setField("date_of_birth", e.target.value)} /></Field>
-            <Field label="Age"><input style={inputStyle} type="number" min="0" max="130" value={form.age} onChange={(e) => setField("age", e.target.value)} /></Field>
+          <div className={styles.relationshipGrid}>
+            <Field label="Relationship"><Input value={form.relationship} onChange={(e) => setField("relationship", e.target.value)} placeholder="Parent, child, spouse" /></Field>
+            <Field label="Birth date"><Input type="date" value={form.date_of_birth} onChange={(e) => setField("date_of_birth", e.target.value)} /></Field>
+            <Field label="Age"><Input type="number" min="0" max="130" value={form.age} onChange={(e) => setField("age", e.target.value)} /></Field>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "150px 1fr 1fr", gap: 10 }}>
+          <div className={styles.contactGrid}>
             <Field label="Gender">
-              <select style={inputStyle} value={form.gender} onChange={(e) => setField("gender", e.target.value)}>
+              <Select value={form.gender} onChange={(e) => setField("gender", e.target.value)}>
                 {GENDERS.map((g) => <option key={g || "blank"} value={g}>{g || "Select"}</option>)}
-              </select>
+              </Select>
             </Field>
-            <Field label="Phone"><input style={inputStyle} value={form.phone} onChange={(e) => setField("phone", e.target.value)} /></Field>
-            <Field label="Email"><input style={inputStyle} type="email" value={form.email} onChange={(e) => setField("email", e.target.value)} /></Field>
+            <Field label="Phone"><Input value={form.phone} onChange={(e) => setField("phone", e.target.value)} /></Field>
+            <Field label="Email"><Input type="email" value={form.email} onChange={(e) => setField("email", e.target.value)} /></Field>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className={styles.formActions}>
             <ActionButton onClick={save} disabled={saving}>{saving ? "Saving..." : editingId ? "Update relative" : "Save relative"}</ActionButton>
             {editingId && <ActionButton tone="secondary" onClick={reset}>Cancel edit</ActionButton>}
           </div>
         </div>
       </Panel>
 
-      <Panel style={{ padding: 18 }}>
-        <div style={{ fontSize: 15, fontWeight: 900, color: "#162235", marginBottom: 12 }}>Saved relatives ({relatives.length})</div>
+      <Panel className={styles.formPanel}>
+        <div className={styles.savedTitle}>Saved relatives (<span className={styles.reference}>{relatives.length}</span>)</div>
         {loading ? (
           <LoadingState label="Loading relatives..." />
         ) : relatives.length === 0 ? (
           <EmptyState title="No saved relatives" detail="Add someone above, or tick 'Save this person' while booking for someone else." />
         ) : (
-          <div style={{ display: "grid", gap: 10 }}>
+          <div className={styles.formFields}>
             {relatives.map((r) => (
-              <div key={r.relative_id} style={{ border: "1px solid #e3ebf5", borderRadius: 8, padding: 12, display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 900, color: "#162235" }}>{r.first_name} {r.last_name}</div>
-                  <div style={{ color: "#6b778c", fontSize: 12, marginTop: 2 }}>
+              <div key={r.relative_id} className={styles.relativeCard}>
+                <div className={styles.relativeCopy}>
+                  <div className={styles.relativeName}>{r.first_name} {r.last_name}</div>
+                  <div className={styles.relativeDetail}>
                     {r.relationship}{r.age ? ` - ${r.age} y/o` : ""}{r.gender ? ` - ${r.gender}` : ""}
                   </div>
-                  {(r.phone || r.email) && <div style={{ color: "#42526a", fontSize: 12, marginTop: 2 }}>{[r.phone, r.email].filter(Boolean).join(" - ")}</div>}
+                  {(r.phone || r.email) && <div className={styles.relativeContact}>{[r.phone, r.email].filter(Boolean).join(" - ")}</div>}
                 </div>
-                <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
+                <div className={styles.relativeActions}>
                   <ActionButton tone="secondary" onClick={() => edit(r)}>Edit</ActionButton>
                   <ActionButton tone="danger" onClick={() => remove(r)}>Delete</ActionButton>
                 </div>
@@ -519,58 +482,92 @@ function RelativesTab() {
           </div>
         )}
       </Panel>
+
+      {confirm && (
+        <ConfirmModal
+          title={confirm.title}
+          message={confirm.message}
+          confirmText={confirm.confirmText}
+          onClose={() => setConfirm(null)}
+          onConfirm={() => { const r = confirm.relative; setConfirm(null); doRemove(r); }}
+        />
+      )}
     </div>
   );
 }
 
-function AppointmentTable({ title, rows, emptyTitle, emptyDetail, history = false, actions = null }) {
+export function VisitContext({ appointment }) {
+  if (!appointment) return null;
+  return (
+    <Panel className={styles.visitPanel}>
+      <div className={styles.visitHeading}>
+        <div>
+          <div className={styles.eyebrow}>Your visit progress</div>
+          <div className={styles.visitTitle}>{appointment.doctor_name || "Doctor"}</div>
+          {appointment.specialty_name && <div className={styles.visitSpecialty}>{appointment.specialty_name}</div>}
+        </div>
+        <span className={styles.reference}>Appointment #{appointment.id}</span>
+      </div>
+      <dl className={styles.visitDetails}>
+        <div><dt>Patient</dt><dd><PatientIdentity name={appointment.patient_name || "-"} /></dd></div>
+        <div><dt>Booked for</dt><dd>{bookingTarget(appointment)}</dd></div>
+        <div><dt>Schedule</dt><dd>{formatDate(appointment.date)} at {formatTime(appointment.time)}</dd></div>
+      </dl>
+      <Thread status={appointment.status} className={styles.visitThread} />
+    </Panel>
+  );
+}
+
+export function AppointmentTable({ title, rows, emptyTitle, emptyDetail, emptyAction, history = false, actions = null }) {
   // Paginate here so every tab that renders this table gets the same behaviour.
   // `title` is the reset key: switching tabs starts at page 1, while a data
   // refresh keeps the reader on the page they were viewing.
   const { page, totalPages, pageItems, setPage, pageSize, totalItems } = usePagination(rows, 10, title);
 
   return (
-    <Panel style={{ overflow: "hidden" }}>
-      <div style={{ padding: "14px 16px", borderBottom: "1px solid #e8eef6", display: "flex", justifyContent: "space-between", gap: 12 }}>
+    <Panel className={styles.tablePanel}>
+      <div className={styles.tableHeading}>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 900, color: "#162235" }}>{title}</div>
-          <div style={{ fontSize: 12, color: "#6b778c", marginTop: 2 }}>
+          <h2 className={styles.sectionTitle}>{title}</h2>
+          <div className={styles.tableDescription}>
             {rows.length} record(s){history ? " - read-only history" : " - clinic confirmation required before queueing"}
           </div>
         </div>
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState title={emptyTitle} detail={emptyDetail} />
+        <EmptyState title={emptyTitle} detail={emptyDetail} action={emptyAction} />
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+        <div className={styles.tableViewport}>
+          <table className={`qc-rtable ${styles.table}`} aria-label={title}>
             <thead>
-              <tr style={{ background: "#f7fafd", color: "#65758b" }}>
+              <tr>
                 {["ID", "Patient", "Booked For", "Doctor", "Specialty", "Schedule", "Status", "Details", ...(actions ? ["Actions"] : [])].map((heading) => (
-                  <th key={heading} style={{ textAlign: "left", padding: "11px 14px", fontSize: 11, textTransform: "uppercase" }}>{heading}</th>
+                  <th scope="col" key={heading} className={heading === "ID" ? styles.numeric : undefined}>{heading}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {pageItems.map((item) => (
-                <tr key={item.id} style={{ borderTop: "1px solid #eef3f9" }}>
-                  <td style={{ padding: "12px 14px", color: "#6b778c", fontWeight: 800 }}>#{item.id}</td>
-                  <td style={{ padding: "12px 14px" }}>
-                    <div style={{ fontWeight: 900, color: "#162235" }}>{item.patient_name || "-"}</div>
-                    <div style={{ fontSize: 12, color: "#6b778c" }}>{item.patient_phone || item.patient_email || ""}</div>
+                <tr key={item.id}>
+                  <td data-label="Ref" className={styles.numeric}>#{item.id}</td>
+                  <td data-label="Patient">
+                    <PatientIdentity name={item.patient_name || "-"}><div>
+                    <div className={styles.patientName}>{item.patient_name || "-"}</div>
+                    <div className={styles.patientContact}>{item.patient_phone || item.patient_email || ""}</div>
+                    </div></PatientIdentity>
                   </td>
-                  <td style={{ padding: "12px 14px", color: "#42526a", fontWeight: 800 }}>{bookingTarget(item)}</td>
-                  <td style={{ padding: "12px 14px", fontWeight: 700 }}>{item.doctor_name || "-"}</td>
-                  <td style={{ padding: "12px 14px" }}>{item.specialty_name || "-"}</td>
-                  <td style={{ padding: "12px 14px", whiteSpace: "nowrap" }}>{formatDate(item.date)} at {formatTime(item.time)}</td>
-                  <td style={{ padding: "12px 14px" }}><StatusBadge status={item.status} /></td>
-                  <td style={{ padding: "12px 14px", color: "#42526a", minWidth: 180 }}>
-                    <div style={{ fontSize: 12, lineHeight: 1.45 }}>{item.chief_complaint || item.notes || "-"}</div>
+                  <td data-label="Booked For" className={styles.bookedFor}>{bookingTarget(item)}</td>
+                  <td data-label="Doctor" className={styles.doctorName}>{item.doctor_name || "-"}</td>
+                  <td data-label="Specialty">{item.specialty_name || "-"}</td>
+                  <td data-label="Schedule" className={styles.schedule}>{formatDate(item.date)} at {formatTime(item.time)}</td>
+                  <td data-label="Status" className={`qc-td-block ${styles.statusCell}`}><Thread status={item.status} compact /></td>
+                  <td data-label="Details" className={`qc-td-block ${styles.detailsCell}`}>
+                    <div className={styles.detailText}>{item.chief_complaint || item.notes || "-"}</div>
                   </td>
                   {actions && (
-                    <td style={{ padding: "12px 14px", whiteSpace: "nowrap" }}>
-                      <div style={{ display: "flex", gap: 6 }}>
+                    <td data-label="Actions" className={`qc-td-block ${styles.actionsCell}`}>
+                      <div className={`qc-actions ${styles.rowActions}`}>
                         {EDITABLE.includes(item.status) && (
                           <ActionButton tone="secondary" disabled={actions.busyId === item.id} onClick={() => actions.onEdit(item)}>Edit</ActionButton>
                         )}
@@ -578,7 +575,7 @@ function AppointmentTable({ title, rows, emptyTitle, emptyDetail, history = fals
                           <ActionButton tone="danger" disabled={actions.busyId === item.id} onClick={() => actions.onCancel(item)}>Cancel</ActionButton>
                         )}
                         {!EDITABLE.includes(item.status) && !CANCELLABLE.includes(item.status) && (
-                          <span style={{ color: "#6b778c", fontSize: 11, fontWeight: 700, whiteSpace: "normal", maxWidth: 210, display: "inline-block", lineHeight: 1.4 }}>
+                          <span className={styles.clinicContact}>
                             Confirmed — call the clinic at {CLINIC_PHONE} to change or cancel.
                           </span>
                         )}

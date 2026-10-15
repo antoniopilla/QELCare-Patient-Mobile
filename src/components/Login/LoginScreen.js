@@ -1,3 +1,4 @@
+import { authClasses, AuthRules, AuthIllustration } from "../Auth/AuthFolio";
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { saveLoginData, API_URL, consumeSessionExpired } from "../../utils/auth";
@@ -36,7 +37,7 @@ function LockoutCountdown({ until }) {
   const [remaining, setRemaining] = useState(0);
 
   useEffect(() => {
-    const calc = () => Math.max(0, Math.floor((new Date(until) - Date.now()) / 1000));
+    const calc = () => Math.max(0, Math.floor((/** @type {number} */ (/** @type {unknown} */ (new Date(until))) - Date.now()) / 1000));
     setRemaining(calc());
     const id = setInterval(() => {
       const r = calc();
@@ -49,213 +50,14 @@ function LockoutCountdown({ until }) {
   const m = Math.floor(remaining / 60);
   const s = remaining % 60;
   return (
-    <span style={{ fontVariantNumeric: "tabular-nums" }}>
+    <span className={authClasses("mono")}>
       {m > 0 ? `${m}m ` : ""}{String(s).padStart(2, "0")}s
     </span>
   );
 }
 
 // """ Styles """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-const styles = `
-  :root {
-    --navy:   #0e2340;
-    --navy-2: #163a6b;
-    --navy-3: #1e4d8c;
-    --blue:   #2d6be4;
-    --teal:   #0e8a7a;
-    --ink:    #111827;
-    --ink-2:  #374151;
-    --muted:  #6b7280;
-    --line:   #e5eaf3;
-    --warn:   #b45309;
-    --warn-bg:#fffbeb;
-    --warn-bd:#fde68a;
-  }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body, #root { height: 100%; overflow: hidden; }
-  body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #eef2fb 0%, #f4f7fc 60%, #eaf0f9 100%); }
-  button, input { font: inherit; outline: none; }
-
-  /* Restore a clear keyboard focus ring for buttons, links, and checkboxes
-     (text inputs keep their own :focus ring below). */
-  a:focus-visible,
-  button:focus-visible,
-  input[type="checkbox"]:focus-visible {
-    outline: 3px solid var(--blue);
-    outline-offset: 2px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { transition-duration: .001ms !important; animation-duration: .001ms !important; }
-    .ls-btn:hover:not(:disabled), .ls-patient-btn:hover, .ls-home-btn:hover { transform: none; }
-  }
-
-  /* "" Page "" */
-  .ls-page { height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-  .ls-shell {
-    width: 100%; max-width: 1100px;
-    height: calc(100vh - 40px); max-height: 760px;
-    display: grid; grid-template-columns: 1.1fr 0.9fr;
-    border-radius: 24px; overflow: hidden;
-    box-shadow: 0 24px 64px rgba(14,35,64,.18), 0 2px 6px rgba(14,35,64,.08);
-    border: 1px solid rgba(255,255,255,.7);
-  }
-
-  /* "" Brand "" */
-  .ls-brand {
-    position: relative; display: flex; flex-direction: column;
-    justify-content: space-between; padding: 36px 42px;
-    color: #fff; background: linear-gradient(148deg, #0e2340 0%, #1e4d8c 100%); overflow: hidden;
-  }
-  .ls-brand::before {
-    content: ""; position: absolute; width: 480px; height: 480px; top: -180px; right: -140px;
-    border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.1) 0%, transparent 68%); pointer-events: none;
-  }
-  .ls-brand::after {
-    content: ""; position: absolute; width: 300px; height: 300px; left: -90px; bottom: -100px;
-    border-radius: 50%; background: radial-gradient(circle, rgba(45,107,228,.26) 0%, transparent 70%); pointer-events: none;
-  }
-  .ls-grid-bg {
-    position: absolute; inset: 0; pointer-events: none;
-    background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-    background-size: 36px 36px;
-  }
-  .ls-brand-top, .ls-brand-body, .ls-brand-foot { position: relative; z-index: 1; }
-
-  /* Brand top row: logo + home button */
-  .ls-brand-top { display: flex; align-items: center; justify-content: space-between; }
-  .ls-logo { display: inline-flex; align-items: center; gap: 11px; font-size: .9rem; font-weight: 700; }
-  .ls-logo-mark { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); }
-  .ls-logo-mark svg { width: 18px; height: 18px; }
-
-  .ls-home-btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 8px 14px; border-radius: 10px;
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
-    color: rgba(255,255,255,.85); font-size: .78rem; font-weight: 700;
-    cursor: pointer; transition: background .18s, color .18s; letter-spacing: .01em;
-  }
-  .ls-home-btn svg { width: 14px; height: 14px; }
-  .ls-home-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
-
-  .ls-eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 6px 12px; border-radius: 999px;
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
-    font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 16px;
-  }
-  .ls-eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: #5eead4; box-shadow: 0 0 0 4px rgba(94,234,212,.18); }
-
-  .ls-brand h1 { font-size: clamp(1.9rem, 2.8vw, 2.9rem); line-height: 1.1; letter-spacing: -.03em; font-weight: 800; margin-bottom: 12px; }
-  .ls-brand h1 em { font-style: normal; color: rgba(255,255,255,.72); }
-  .ls-brand-desc { color: rgba(255,255,255,.65); font-size: .86rem; line-height: 1.68; max-width: 380px; margin-bottom: 26px; }
-
-  .ls-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .ls-feat { padding: 14px 15px; border-radius: 14px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.11); }
-  .ls-feat-icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.14); margin-bottom: 8px; }
-  .ls-feat-icon svg { width: 14px; height: 14px; }
-  .ls-feat strong { display: block; font-size: .78rem; font-weight: 700; margin-bottom: 3px; }
-  .ls-feat span { color: rgba(255,255,255,.6); font-size: .73rem; line-height: 1.45; }
-
-  .ls-brand-foot { display: flex; justify-content: space-between; align-items: center; color: rgba(255,255,255,.42); font-size: .76rem; flex-wrap: wrap; gap: 8px; }
-  .ls-foot-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); font-size: .7rem; font-weight: 600; }
-  .ls-foot-badge svg { width: 12px; height: 12px; }
-
-  /* "" Form panel "" */
-  .ls-form-panel { display: flex; align-items: center; justify-content: center; padding: 36px 44px; background: #fff; overflow-y: auto; }
-  .ls-form-inner { width: 100%; max-width: 360px; }
-
-  .ls-form-head { margin-bottom: 20px; }
-  .ls-form-head h2 { font-size: 1.7rem; font-weight: 800; letter-spacing: -.03em; color: var(--ink); margin-bottom: 5px; }
-  .ls-form-head p { color: var(--muted); font-size: .84rem; line-height: 1.6; }
-
-  .ls-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; background: #f0fdf9; border: 1px solid #bbf0de; color: var(--teal); font-size: .74rem; font-weight: 700; margin-bottom: 18px; }
-  .ls-badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 3px rgba(14,138,122,.15); }
-
-  /* Alerts */
-  .ls-alert { display: flex; align-items: flex-start; gap: 9px; padding: 11px 13px; border-radius: 11px; font-size: .83rem; font-weight: 500; margin-bottom: 13px; line-height: 1.5; }
-  .ls-alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
-  .ls-alert-error   { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
-  .ls-alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
-  .ls-alert-warn    { background: var(--warn-bg); border: 1px solid var(--warn-bd); color: var(--warn); }
-  .ls-alert-lock    { background: #faf5ff; border: 1px solid #ddd6fe; color: #6d28d9; }
-  .ls-alert-info    { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e4d8c; }
-
-  /* Attempts bar */
-  .ls-attempts { margin-top: -6px; margin-bottom: 10px; }
-  .ls-attempts-track { height: 4px; border-radius: 99px; background: #f1f3f7; overflow: hidden; margin-top: 6px; }
-  .ls-attempts-fill  { height: 100%; border-radius: 99px; transition: width .35s, background .35s; }
-
-  /* Fields */
-  .ls-field { margin-bottom: 14px; }
-  .ls-label { display: block; font-size: .79rem; font-weight: 700; color: var(--ink-2); margin-bottom: 6px; letter-spacing: .01em; }
-  .ls-input-wrap { position: relative; }
-  .ls-input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #b0bbc9; width: 16px; height: 16px; pointer-events: none; }
-  .ls-input-icon svg { width: 16px; height: 16px; }
-  .ls-input {
-    width: 100%; height: 47px;
-    border: 1.5px solid var(--line); background: #fafbfd; border-radius: 11px;
-    padding: 0 14px 0 42px; color: var(--ink); font-size: .89rem;
-    transition: border-color .18s, box-shadow .18s, background .18s;
-  }
-  .ls-input::placeholder { color: #c8d0dc; }
-  .ls-input:focus { border-color: var(--blue); background: #fff; box-shadow: 0 0 0 3px rgba(45,107,228,.11); }
-  .ls-input-pr { padding-right: 46px; }
-  .ls-input-error { border-color: #fca5a5 !important; background: #fff8f8 !important; }
-
-  .ls-toggle {
-    position: absolute; right: 4px; top: 3px; bottom: 3px;
-    width: 42px; background: transparent; border-radius: 9px;
-    color: #9ca3af; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: background .15s, color .15s; border: none; z-index: 5; padding: 0;
-  }
-  .ls-toggle svg { width: 18px; height: 18px; display: block; pointer-events: none; }
-  .ls-toggle:hover { background: #f3f5f9; color: var(--ink-2); }
-  .ls-toggle:active { background: #e9edf3; }
-
-  /* Remember me + forgot */
-  .ls-row-meta { display: flex; align-items: center; justify-content: space-between; margin: -2px 0 16px; }
-  .ls-remember { display: flex; align-items: center; gap: 7px; cursor: pointer; }
-  .ls-remember input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--blue); cursor: pointer; border-radius: 4px; }
-  .ls-remember-label { font-size: .79rem; font-weight: 600; color: var(--ink-2); user-select: none; }
-  .ls-link { color: var(--blue); font-size: .81rem; font-weight: 700; border: none; background: none; cursor: pointer; padding: 4px 0; transition: color .15s; }
-  .ls-link:hover { color: var(--navy-2); text-decoration: underline; }
-
-  /* Submit */
-  .ls-btn {
-    width: 100%; height: 47px; border: none; border-radius: 11px;
-    background: linear-gradient(135deg, #1e4d8c 0%, #0e2340 100%);
-    color: #fff; font-weight: 700; font-size: .91rem; cursor: pointer; letter-spacing: .01em;
-    box-shadow: 0 4px 14px rgba(14,35,64,.22);
-    transition: transform .18s, box-shadow .18s, opacity .18s;
-  }
-  .ls-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(14,35,64,.28); }
-  .ls-btn:disabled { opacity: .65; cursor: not-allowed; }
-
-  /* Divider */
-  .ls-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0 13px; }
-  .ls-divider-line { flex: 1; height: 1px; background: var(--line); }
-  .ls-divider-label { font-size: .67rem; font-weight: 800; color: #b0bac8; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
-
-  .ls-patient-box { background: #f8fafd; border: 1.5px solid var(--line); border-radius: 14px; padding: 14px 15px; }
-  .ls-patient-lbl { font-size: .68rem; font-weight: 800; color: #9ba8bc; letter-spacing: .09em; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
-  .ls-patient-btns { display: grid; grid-template-columns: 1fr; gap: 8px; }
-  .ls-patient-btn {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    height: 41px; border-radius: 10px; border: 1.5px solid var(--line);
-    background: #fff; color: var(--navy-2); font-size: .81rem; font-weight: 700;
-    cursor: pointer; box-shadow: 0 1px 3px rgba(14,35,64,.05);
-    transition: border-color .18s, background .18s, box-shadow .18s, transform .15s;
-  }
-  .ls-patient-btn svg { width: 14px; height: 14px; }
-  .ls-patient-btn:hover { border-color: #93b4e8; background: #f0f5ff; box-shadow: 0 4px 10px rgba(45,107,228,.1); transform: translateY(-1px); }
-
-  .ls-footnote { margin-top: 13px; text-align: center; color: #9ba8bc; font-size: .75rem; line-height: 1.55; }
-
-  /* Lockout overlay on button */
-  .ls-btn-lock { background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%) !important; }
-`;
 
 export default function LoginScreen() {
   const navigate = useNavigate();
@@ -405,7 +207,7 @@ export default function LoginScreen() {
 
   // Attempts bar: 5 max before first lock
   const attemptsBarWidth = attemptsLeft != null ? `${((5 - attemptsLeft) / 5) * 100}%` : "0%";
-  const attemptsBarColor = attemptsLeft <= 1 ? "#ef4444" : attemptsLeft <= 2 ? "#f97316" : "#eab308";
+  const attemptsBarColor = attemptsLeft <= 1 ? "var(--signal)" : attemptsLeft <= 2 ? "var(--signal)" : "var(--ink-2)";
 
   const alertClass = {
     error: "ls-alert-error",
@@ -421,20 +223,20 @@ export default function LoginScreen() {
 
   return (
     <>
-      <style>{styles}</style>
-      <div className="ls-page">
-        <div className="ls-shell">
+
+      <div className={authClasses("ls-page")}>
+        <div className={authClasses("ls-shell")}>
 
           {/* "" Brand "" */}
-          <section className="ls-brand">
-            <div className="ls-grid-bg" />
-            <div className="ls-brand-top">
-              <div className="ls-logo">
-                <div className="ls-logo-mark"><PlusIcon /></div>
+          <section className={authClasses("ls-brand")}>
+            <AuthRules />
+            <div className={authClasses("ls-brand-top")}>
+              <div className={authClasses("ls-logo")}>
+                <div className={authClasses("ls-logo-mark")}><PlusIcon /></div>
                 <span>QELCare Portal</span>
               </div>
               <button
-                className="ls-home-btn"
+                className={authClasses("ls-home-btn")}
                 onClick={() => navigate("/")}
                 title="Go to home page"
               >
@@ -442,17 +244,18 @@ export default function LoginScreen() {
               </button>
             </div>
 
-            <div className="ls-brand-body">
-              <div className="ls-eyebrow">
-                <span className="ls-eyebrow-dot" />
+            <div className={authClasses("ls-brand-body")}>
+              <div className={authClasses("ls-eyebrow")}>
+                <span className={authClasses("ls-eyebrow-dot")} />
                 Multispecialty Clinic Management
               </div>
-              <h1>Secure sign in for<br /><em>patients and clinic staff.</em></h1>
-              <p className="ls-brand-desc">Access appointments, records, billing, and clinic services through one streamlined portal.</p>
-              <div className="ls-features">
+              <h1>Secure sign in for<br /><em>your patient account.</em></h1>
+              <p className={authClasses("ls-brand-desc")}>Access appointments, records, billing, and clinic services through one streamlined portal.</p>
+              <AuthIllustration />
+              <div className={authClasses("ls-features")}>
                 {FEATURES.map(f => (
-                  <div className="ls-feat" key={f.title}>
-                    <div className="ls-feat-icon">{f.icon}</div>
+                  <div className={authClasses("ls-feat")} key={f.title}>
+                    <div className={authClasses("ls-feat-icon")}>{f.icon}</div>
                     <strong>{f.title}</strong>
                     <span>{f.desc}</span>
                   </div>
@@ -460,26 +263,26 @@ export default function LoginScreen() {
               </div>
             </div>
 
-            <div className="ls-brand-foot">
+            <div className={authClasses("ls-brand-foot")}>
               <span>QELCare Clinic Management System</span>
-              <span className="ls-foot-badge"><ShieldIcon />Secure access</span>
+              <span className={authClasses("ls-foot-badge")}><ShieldIcon />Secure access</span>
             </div>
           </section>
 
           {/* "" Form "" */}
-          <section className="ls-form-panel">
-            <div className="ls-form-inner">
-              <div className="ls-form-head">
+          <section className={authClasses("ls-form-panel")}>
+            <div className={authClasses("ls-form-inner")}>
+              <div className={authClasses("ls-form-head")}>
                 <h2>Sign in</h2>
                 <p>Enter your credentials to access your QELCare portal account.</p>
               </div>
 
-              <div className="ls-badge"><span className="ls-badge-dot" />Secure portal authentication</div>
+              <div className={authClasses("ls-badge")}><span className={authClasses("ls-badge-dot")} />Secure portal authentication</div>
 
               {/* Alerts - aria-live so screen readers announce changes */}
               {error && (
                 <div
-                  className={`ls-alert ${alertClass}`}
+                  className={authClasses(`ls-alert ${alertClass}`)}
                   role="alert"
                   aria-live="assertive"
                 >
@@ -495,22 +298,22 @@ export default function LoginScreen() {
                 </div>
               )}
               {notice && !error && !success && (
-                <div className="ls-alert ls-alert-info" role="status" aria-live="polite">
+                <div className={authClasses("ls-alert ls-alert-info")} role="status" aria-live="polite">
                   <InfoIcon />{notice}
                 </div>
               )}
               {success && (
-                <div className="ls-alert ls-alert-success" role="status" aria-live="polite">
+                <div className={authClasses("ls-alert ls-alert-success")} role="status" aria-live="polite">
                   <CheckIcon />{success}
                 </div>
               )}
 
               {/* Attempts progress bar */}
               {attemptsLeft != null && attemptsLeft < 5 && (
-                <div className="ls-attempts">
-                  <div className="ls-attempts-track">
+                <div className={authClasses("ls-attempts")}>
+                  <div className={authClasses("ls-attempts-track")}>
                     <div
-                      className="ls-attempts-fill"
+                      className={authClasses("ls-attempts-fill")}
                       style={{ width: attemptsBarWidth, background: attemptsBarColor }}
                     />
                   </div>
@@ -518,14 +321,14 @@ export default function LoginScreen() {
               )}
 
               {/* Username */}
-              <div className="ls-field">
-                <label className="ls-label" htmlFor="qelcare-username">Username</label>
-                <div className="ls-input-wrap">
-                  <span className="ls-input-icon"><UserIcon /></span>
+              <div className={authClasses("ls-field")}>
+                <label className={authClasses("ls-label")} htmlFor="qelcare-username">Username</label>
+                <div className={authClasses("ls-input-wrap")}>
+                  <span className={authClasses("ls-input-icon")}><UserIcon /></span>
                   <input
                     id="qelcare-username"
                     ref={usernameRef}
-                    className={`ls-input${errorField === "username" ? " ls-input-error" : ""}`}
+                    className={authClasses(`ls-input${errorField === "username" ? " ls-input-error" : ""}`)}
                     aria-invalid={errorField === "username"}
                     type="text"
                     placeholder="Enter your username"
@@ -540,14 +343,14 @@ export default function LoginScreen() {
               </div>
 
               {/* Password */}
-              <div className="ls-field">
-                <label className="ls-label" htmlFor="qelcare-password">Password</label>
-                <div className="ls-input-wrap">
-                  <span className="ls-input-icon"><LockIcon /></span>
+              <div className={authClasses("ls-field")}>
+                <label className={authClasses("ls-label")} htmlFor="qelcare-password">Password</label>
+                <div className={authClasses("ls-input-wrap")}>
+                  <span className={authClasses("ls-input-icon")}><LockIcon /></span>
                   <input
                     id="qelcare-password"
                     ref={passwordRef}
-                    className={`ls-input ls-input-pr${errorField === "password" ? " ls-input-error" : ""}`}
+                    className={authClasses(`ls-input ls-input-pr${errorField === "password" ? " ls-input-error" : ""}`)}
                     aria-invalid={errorField === "password"}
                     type={showPass ? "text" : "password"}
                     placeholder="Enter your password"
@@ -559,7 +362,7 @@ export default function LoginScreen() {
                     disabled={loading || !!success || isLocked}
                   />
                   <button
-                    className="ls-toggle"
+                    className={authClasses("ls-toggle")}
                     type="button"
                     onClick={() => setShowPass(v => !v)}
                     aria-label={showPass ? "Hide password" : "Show password"}
@@ -570,44 +373,44 @@ export default function LoginScreen() {
               </div>
 
               {/* Remember me + Forgot */}
-              <div className="ls-row-meta">
-                <label className="ls-remember">
+              <div className={authClasses("ls-row-meta")}>
+                <label className={authClasses("ls-remember")}>
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={e => setRememberMe(e.target.checked)}
                   />
-                  <span className="ls-remember-label">Remember username</span>
+                  <span className={authClasses("ls-remember-label")}>Remember username</span>
                 </label>
-                <button className="ls-link" onClick={() => navigate("/forgot-password")}>
+                <button className={authClasses("ls-link")} onClick={() => navigate("/forgot-password")}>
                   Forgot password?
                 </button>
               </div>
 
               <button
-                className={`ls-btn${isLocked ? " ls-btn-lock" : ""}`}
+                className={authClasses(`ls-btn${isLocked ? " ls-btn-lock" : ""}`)}
                 onClick={handleLogin}
                 disabled={loading || !!success || isLocked}
               >
                 {loading ? "Signing in..." : success ? "Redirecting..." : isLocked ? "Account Locked" : "Sign in to QELCare"}
               </button>
 
-              <div className="ls-divider">
-                <div className="ls-divider-line" />
-                <span className="ls-divider-label">Patient Access</span>
-                <div className="ls-divider-line" />
+              <div className={authClasses("ls-divider")}>
+                <div className={authClasses("ls-divider-line")} />
+                <span className={authClasses("ls-divider-label")}>Patient Access</span>
+                <div className={authClasses("ls-divider-line")} />
               </div>
 
-              <div className="ls-patient-box">
-                <p className="ls-patient-lbl">New to QELCare?</p>
-                <div className="ls-patient-btns">
-                  <button className="ls-patient-btn" onClick={() => navigate("/register")}>
+              <div className={authClasses("ls-patient-box")}>
+                <p className={authClasses("ls-patient-lbl")}>New to QELCare?</p>
+                <div className={authClasses("ls-patient-btns")}>
+                  <button className={authClasses("ls-patient-btn")} onClick={() => navigate("/register")}>
                     <UserPlusIcon />New Patient
                   </button>
                 </div>
               </div>
 
-              <p className="ls-footnote">Contact your administrator if you need a new staff account.</p>
+              <p className={authClasses("ls-footnote")}>Use your existing QELCare patient account to sign in.</p>
             </div>
           </section>
 

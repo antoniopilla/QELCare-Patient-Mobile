@@ -1,0 +1,62 @@
+/* Shared entrance motion. Opt in only on groups without sticky/fixed children. */
+.reveal > * {
+  animation: folioReveal var(--dur-3) var(--ease-out) backwards;
+  animation-delay: 0ms;
+}
+.reveal > :nth-child(2) { animation-delay: 40ms; }
+.reveal > :nth-child(3) { animation-delay: 80ms; }
+.reveal > :nth-child(4) { animation-delay: 120ms; }
+.reveal > :nth-child(5) { animation-delay: 160ms; }
+.reveal > :nth-child(6) { animation-delay: 200ms; }
+.reveal > :nth-child(7) { animation-delay: 240ms; }
+.reveal > :nth-child(n + 8) { animation-delay: 280ms; }
+
+@keyframes folioReveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Observer enhancement leaves the default/unsupported state fully readable. */
+.qc-scroll-reveal[data-reveal-state="pending"] { opacity: 0; transform: translateY(8px); }
+.qc-scroll-reveal[data-reveal-state="visible"] { animation: folioReveal var(--dur-3) var(--ease-out); }
+.qc-scroll-reveal:focus-within { opacity: 1; transform: none; animation: none; }
+
+.qc-rtable tbody tr,
+.qc-rtable tbody td { transition: background-color var(--dur-1) var(--ease-out); }
+.qc-rtable tbody tr:hover { background-color: var(--pine-50); }
+
+/* Opacity preserves the layout and Tab order of each row's controls. */
+tr :is(.qc-row-actions, .qc-actions) {
+  transition: opacity var(--dur-1) var(--ease-out);
+}
+tr :is(.qc-row-actions, .qc-actions) button {
+  transition: background-color var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), transform var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
+}
+tr :is(.qc-row-actions, .qc-actions) button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card);
+}
+tr :is(.qc-row-actions, .qc-actions) button:active:not(:disabled) {
+  transform: scale(.98);
+  box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  tr :is(.qc-row-actions, .qc-actions) { opacity: 0; }
+  tr:hover :is(.qc-row-actions, .qc-actions),
+  tr:focus-within :is(.qc-row-actions, .qc-actions) { opacity: 1; }
+}
+
+@media (any-pointer: coarse), (hover: none), (max-width: 640px) {
+  tr :is(.qc-row-actions, .qc-actions) { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal > * { animation: none; }
+  .qc-scroll-reveal[data-reveal-state] { opacity: 1; transform: none; animation: none; }
+  .qc-rtable tbody tr,
+  .qc-rtable tbody td,
+  tr :is(.qc-row-actions, .qc-actions),
+  tr :is(.qc-row-actions, .qc-actions) button { transition: none; }
+  tr :is(.qc-row-actions, .qc-actions) button:is(:hover, :active):not(:disabled) { transform: none; }
+}
